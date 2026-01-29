@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react'
+import { Card } from '../types'
 
 interface WordButtonProps {
-  word: string
+  card: Card
   selected: boolean
   solved: boolean
   color?: string
   onClick: () => void
-  onHover?: (word: string) => void
+  onHover?: (card: Card) => void
   onLeave?: () => void
 }
 
 export const WordButton: React.FC<WordButtonProps> = ({
-  word,
+  card,
   selected,
   solved,
   color,
@@ -26,7 +27,7 @@ export const WordButton: React.FC<WordButtonProps> = ({
     const fetchCardImage = async () => {
       try {
         const response = await fetch(
-          `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(word)}`
+          `https://api.scryfall.com/cards/${card.id}`
         )
         if (response.ok) {
           const data = await response.json()
@@ -44,7 +45,7 @@ export const WordButton: React.FC<WordButtonProps> = ({
     }
 
     fetchCardImage()
-  }, [word])
+  }, [card.id])
 
   const baseClass = 'rounded transition-all cursor-pointer overflow-hidden'
 
@@ -57,10 +58,10 @@ export const WordButton: React.FC<WordButtonProps> = ({
         {loading ? (
           <div className="w-full h-32 bg-gray-300 animate-pulse" />
         ) : imageUrl ? (
-          <img src={imageUrl} alt={word} className="w-full h-auto" />
+          <img src={imageUrl} alt={card.name} className="w-full h-auto" />
         ) : (
           <div className="w-full h-32 bg-gray-500 flex items-center justify-center text-white text-sm">
-            {word}
+            {card.name}
           </div>
         )}
       </button>
@@ -70,7 +71,7 @@ export const WordButton: React.FC<WordButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => onHover?.(word)}
+      onMouseEnter={() => onHover?.(card)}
       onMouseLeave={() => onLeave?.()}
       className={`${baseClass} ${
         selected
@@ -81,10 +82,10 @@ export const WordButton: React.FC<WordButtonProps> = ({
       {loading ? (
         <div className="w-full h-32 bg-gray-300 animate-pulse" />
       ) : imageUrl ? (
-        <img src={imageUrl} alt={word} className="w-full h-auto" />
+        <img src={imageUrl} alt={card.name} className="w-full h-auto" />
       ) : (
         <div className="w-full h-32 bg-gray-400 flex items-center justify-center text-white text-sm text-center px-2">
-          {word}
+          {card.name}
         </div>
       )}
     </button>

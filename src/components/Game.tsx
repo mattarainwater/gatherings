@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { GameBoard } from './GameBoard'
-import { GameState, Category } from '../types'
+import { GameState, Category, Card } from '../types'
 import { SAMPLE_PUZZLE, shuffleArray } from '../utils/gameUtils'
 
 export const Game: React.FC = () => {
@@ -14,12 +14,12 @@ export const Game: React.FC = () => {
     message: ''
   })
 
-  const [words, setWords] = useState<string[]>([])
+  const [cards, setCards] = useState<Card[]>([])
 
   // Initialize and shuffle words
   useEffect(() => {
-    const allWords = SAMPLE_PUZZLE.flatMap(cat => cat.words)
-    setWords(shuffleArray(allWords))
+    const allWords = SAMPLE_PUZZLE.flatMap(cat => cat.cards.map(card => card))
+    setCards(shuffleArray(allWords))
   }, [])
 
   // Clear message after delay
@@ -32,23 +32,23 @@ export const Game: React.FC = () => {
     }
   }, [gameState.message])
 
-  const handleWordClick = (word: string) => {
+  const handleWordClick = (card: Card) => {
     if (gameState.gameOver || gameState.solved.some(catName =>
-      SAMPLE_PUZZLE.find(cat => cat.name === catName)?.words.includes(word)
+      SAMPLE_PUZZLE.find(cat => cat.name === catName)?.cards.map(card => card.id).includes(card.id)
     )) {
       return
     }
 
     setGameState(prev => ({
       ...prev,
-      selected: prev.selected.includes(word)
-        ? prev.selected.filter(w => w !== word)
-        : [...prev.selected, word]
+      selected: prev.selected.includes(card)
+        ? prev.selected.filter(w => w.id !== card.id)
+        : [...prev.selected, card]
     }))
   }
 
   const handleShuffle = () => {
-    setWords(shuffleArray(words))
+    setCards(shuffleArray(cards))
   }
 
   const handleDeselect = () => {
@@ -58,11 +58,11 @@ export const Game: React.FC = () => {
   const handleSolve = () => {
     if (gameState.selected.length !== 4 || gameState.gameOver) return
 
-    const selectedSet = new Set(gameState.selected.map(w => w.toLowerCase()))
+    const selectedSet = new Set(gameState.selected)
     let foundCategory: Category | null = null
 
     for (const category of gameState.categories) {
-      const categorySet = new Set(category.words.map(w => w.toLowerCase()))
+      const categorySet = new Set(category.cards)
       if (
         categorySet.size === selectedSet.size &&
         [...categorySet].every(w => selectedSet.has(w))
@@ -90,7 +90,7 @@ export const Game: React.FC = () => {
       for (const category of gameState.categories) {
         if (gameState.solved.includes(category.name)) continue
 
-        const categorySet = new Set(category.words.map(w => w.toLowerCase()))
+        const categorySet = new Set(category.cards)
         const matchCount = [...selectedSet].filter(w => categorySet.has(w)).length
         if (matchCount === 3) {
           oneAway = true
@@ -116,8 +116,8 @@ export const Game: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8">
       <GameBoard
         gameState={gameState}
-        words={words.filter(w => !gameState.solved.some(catName =>
-          SAMPLE_PUZZLE.find(cat => cat.name === catName)?.words.includes(w)
+        cards={cards.filter(card => !gameState.solved.some(catName =>
+          SAMPLE_PUZZLE.find(cat => cat.name === catName)?.cards.map(c => c.id).includes(card.id)
         ))}
         onWordClick={handleWordClick}
         onSolve={handleSolve}

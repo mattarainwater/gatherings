@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { WordButton } from './WordButton'
 import { CardPreview } from './CardPreview'
-import { Category, GameState } from '../types'
+import { Card, Category, GameState } from '../types'
 import { getColorClass } from '../utils/gameUtils'
 
 interface GameBoardProps {
   gameState: GameState
-  words: string[]
-  onWordClick: (word: string) => void
+  cards: Card[]
+  onWordClick: (card: Card) => void
   onSolve: () => void
   onShuffle: () => void
   onDeselect: () => void
@@ -15,17 +15,18 @@ interface GameBoardProps {
 
 export const GameBoard: React.FC<GameBoardProps> = ({
   gameState,
-  words,
+  cards,
   onWordClick,
   onSolve,
   onShuffle,
   onDeselect
 }) => {
-  const solvedCategories = gameState.categories.filter(cat =>
-    gameState.solved.includes(cat.name)
-  )
+  // Get solved categories in the order they were solved
+  const solvedCategories = gameState.solved
+    .map(solvedName => gameState.categories.find(cat => cat.name === solvedName))
+    .filter((cat): cat is Category => cat !== undefined)
 
-  const [hoveredWord, setHoveredWord] = useState<string | undefined>(undefined)
+  const [hoveredCard, setHoveredCard] = useState<Card | undefined>(undefined)
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4">
@@ -34,7 +35,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           <div className="p-6 bg-white rounded-lg shadow-lg">
       {/* Title and Mistakes */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Connections</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Gatherings</h1>
         <div className="text-lg font-semibold text-gray-600">
           Mistakes: {gameState.mistakes}/4
         </div>
@@ -48,16 +49,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       </div>
 
       {/* Solved Categories */}
-      {solvedCategories.length > 0 && (
+      {solvedCategories && solvedCategories.length > 0 && (
         <div className="mb-6 space-y-2">
           {solvedCategories.map(cat => (
             <div
               key={cat.name}
-              className={`${getColorClass(cat.color)} text-white p-3 rounded font-semibold text-center`}
+              className={`${getColorClass(cat.color)} text-black p-3 rounded font-bold text-center`}
             >
-              <div className="text-xs opacity-75">{cat.color.toUpperCase()}</div>
               <div>{cat.name}</div>
-              <div className="text-xs opacity-75">{cat.words.join(', ')}</div>
+              <div className="text-xs opacity-75">{cat.cards.map(c => c.name).join(' | ')}</div>
             </div>
           ))}
         </div>
@@ -65,24 +65,24 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Words Grid */}
       <div className="grid grid-cols-4 gap-3 mb-6">
-        {words.map(word => {
+        {cards.map(card => {
           const category = gameState.categories.find(cat =>
-            cat.words.map(w => w.toLowerCase()).includes(word.toLowerCase())
+            cat.cards.map(c => c.id).includes(card.id)
           )
           
-          const isSelected = gameState.selected.includes(word)
+          const isSelected = gameState.selected.map(c => c.id).includes(card.id)
           const isSolved = gameState.solved.includes(category?.name || '')
 
           return (
             <WordButton
-              key={word}
-              word={word}
+              key={card.id}
+              card={card}
               selected={isSelected}
               solved={isSolved}
               color={isSolved ? getColorClass(category?.color!) : undefined}
-              onClick={() => onWordClick(word)}
-              onHover={setHoveredWord}
-              onLeave={() => setHoveredWord(undefined)}
+              onClick={() => onWordClick(card)}
+              onHover={setHoveredCard}
+              onLeave={() => setHoveredCard(undefined)}
             />
           )
         })}
@@ -128,7 +128,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           </div>
         </div>
         <div className="w-full lg:w-80">
-          <CardPreview word={hoveredWord} />
+          <CardPreview card={hoveredCard} />
         </div>
       </div>
     </div>
