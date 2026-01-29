@@ -29,19 +29,19 @@ export const SAMPLE_PUZZLE: Category[] = [
     cards: [
       {
         name: 'Animar, Soul of Elements',
-        id: 'cb073d5b-9515-492d-9b2d-0f64e85f1da8'
+        id: 'a6e4c340-afd1-4405-b58e-8d7438ce9b55'
       },
       {
         name: "Kaalia of the Vast",
-        id: '4b71d89b-7ba4-406f-8736-ac62b9864f21'
+        id: 'e71c8c39-3fbb-4a42-9cf6-b3224f5a56fc'
       },
       {
         name: 'Tariel, Reckoner of Souls',
-        id: 'c09448cf-70c9-494d-90e2-63a958b49bcd'
+        id: 'b588dc15-68e6-4cbb-9345-a921c10f862d'
       },
       {
         name: 'Zedruu the Greathearted',
-        id: 'f851b861-4e9c-4422-8156-37d7bf2928cd'
+        id: 'c1f49150-9977-4ccb-b6cb-f89f7da9bf85'
       },
     ],
     color: 'green',
