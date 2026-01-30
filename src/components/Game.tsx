@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { GameBoard } from './GameBoard'
 import { GameState, Category, Card } from '../types'
-import { SAMPLE_PUZZLE, shuffleArray } from '../utils/gameUtils'
+import { shuffleArray } from '../utils/gameUtils'
+import { puzzleService } from '../services/puzzleService'
 
 export const Game: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>({
-    categories: SAMPLE_PUZZLE,
+    categories: [],
     selected: [],
     solved: [],
     mistakes: 0,
@@ -15,11 +16,27 @@ export const Game: React.FC = () => {
   })
 
   const [cards, setCards] = useState<Card[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Initialize and shuffle words
+  // Fetch puzzle from API and initialize
   useEffect(() => {
-    const allWords = SAMPLE_PUZZLE.flatMap(cat => cat.cards.map(card => card))
-    setCards(shuffleArray(allWords))
+    const initializePuzzle = async () => {
+      try {
+        const categories = await puzzleService.getPuzzle()
+        setGameState(prev => ({
+          ...prev,
+          categories
+        }))
+        const allWords = categories.flatMap(cat => cat.cards.map(card => card))
+        setCards(shuffleArray(allWords))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load puzzle')
+      } finally {
+        setLoading(false)
+      }
+    }
+    initializePuzzle()
   }, [])
 
   // Clear message after delay
@@ -34,7 +51,7 @@ export const Game: React.FC = () => {
 
   const handleWordClick = (card: Card) => {
     if (gameState.gameOver || gameState.solved.some(catName =>
-      SAMPLE_PUZZLE.find(cat => cat.name === catName)?.cards.map(card => card.id).includes(card.id)
+      gameState.categories.find(cat => cat.name === catName)?.cards.map(card => card.id).includes(card.id)
     )) {
       return
     }
@@ -112,12 +129,28 @@ export const Game: React.FC = () => {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-lg text-gray-700">Loading puzzle...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-lg text-red-600">Error: {error}</div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8">
       <GameBoard
         gameState={gameState}
         cards={cards.filter(card => !gameState.solved.some(catName =>
-          SAMPLE_PUZZLE.find(cat => cat.name === catName)?.cards.map(c => c.id).includes(card.id)
+          gameState.categories.find(cat => cat.name === catName)?.cards.map(c => c.id).includes(card.id)
         ))}
         onWordClick={handleWordClick}
         onSolve={handleSolve}

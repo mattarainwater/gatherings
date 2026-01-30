@@ -8,13 +8,18 @@ export function PuzzleCreator() {
   const [categories, setCategories] = useState<Category[]>(
     COLORS.map((color, index) => ({
       name: '',
-      cards: Array(4).fill(null).map(() => ({ name: '', id: '' })),
+      cards: Array(4).fill(null).map(() => ({ name: '', id: '', imageUrl: '' })),
       color: color,
       difficulty: index + 1,
     }))
-  )
+  )  
+  const [publishDate, setPublishDate] = useState('')  
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [lookupLoading, setLookupLoading] = useState<Record<string, boolean>>({})
+  const [lookupErrors, setLookupErrors] = useState<Record<string, string>>({})
+
+  const getLookupKey = (categoryIndex: number, cardIndex: number) => `${categoryIndex}-${cardIndex}`
 
   const handleCategoryNameChange = (categoryIndex: number, name: string) => {
     setCategories((prev) =>
@@ -25,7 +30,7 @@ export function PuzzleCreator() {
   const handleCardChange = (
     categoryIndex: number,
     cardIndex: number,
-    field: 'name' | 'id',
+    field: 'name' | 'id' | 'imageUrl',
     value: string
   ) => {
     setCategories((prev) =>
@@ -42,7 +47,83 @@ export function PuzzleCreator() {
     )
   }
 
+  const handleCardNameLookup = async (categoryIndex: number, cardIndex: number, name: string) => {
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      return
+    }
+
+    const lookupKey = getLookupKey(categoryIndex, cardIndex)
+    setLookupLoading((prev) => ({ ...prev, [lookupKey]: true }))
+    setLookupErrors((prev) => {
+      const { [lookupKey]: _removed, ...rest } = prev
+      return rest
+    })
+
+    try {
+      const response = await fetch(
+        `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(trimmedName)}`
+      )
+      const data = await response.json()
+
+      if (!response.ok || data.object === 'error') {
+        throw new Error(data?.details || 'Card not found on Scryfall')
+      }
+
+      const imageUrl =
+        data?.image_uris?.normal ||
+        data?.card_faces?.[0]?.image_uris?.normal ||
+        data?.card_faces?.[0]?.image_uris?.large ||
+        ''
+
+      setCategories((prev) =>
+        prev.map((cat, catIdx) =>
+          catIdx === categoryIndex
+            ? {
+                ...cat,
+                cards: cat.cards.map((card, cardIdx) =>
+                  cardIdx === cardIndex
+                    ? {
+                        ...card,
+                        id: data.id || card.id,
+                        imageUrl,
+                      }
+                    : card
+                ),
+              }
+            : cat
+        )
+      )
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch card data'
+      setLookupErrors((prev) => ({ ...prev, [lookupKey]: errorMessage }))
+      setCategories((prev) =>
+        prev.map((cat, catIdx) =>
+          catIdx === categoryIndex
+            ? {
+                ...cat,
+                cards: cat.cards.map((card, cardIdx) =>
+                  cardIdx === cardIndex ? { ...card, imageUrl: '' } : card
+                ),
+              }
+            : cat
+        )
+      )
+    } finally {
+      setLookupLoading((prev) => ({ ...prev, [lookupKey]: false }))
+    }
+  }
+
   const validateForm = (): boolean => {
+    if (!publishDate.trim()) {
+      setMessage({ type: 'error', text: 'Publish date is required' })
+      return false
+    }
+    const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/
+    if (!dateRegex.test(publishDate)) {
+      setMessage({ type: 'error', text: 'Publish date must be in m/d/yyyy format' })
+      return false
+    }
     for (const category of categories) {
       if (!category.name.trim()) {
         setMessage({ type: 'error', text: 'All categories must have a name' })
@@ -74,6 +155,7 @@ export function PuzzleCreator() {
 
     try {
       const response = await puzzleService.createPuzzle({
+        publishDate,
         categories: categories.map((cat) => ({
           ...cat,
           cards: cat.cards.map((card) => ({
@@ -89,10 +171,11 @@ export function PuzzleCreator() {
           text: `Puzzle created successfully! ID: ${response.id}`,
         })
         // Reset form
+        setPublishDate('')
         setCategories(
           COLORS.map((color, index) => ({
             name: '',
-            cards: Array(4).fill(null).map(() => ({ name: '', id: '' })),
+            cards: Array(4).fill(null).map(() => ({ name: '', id: '', imageUrl: '' })),
             color: color,
             difficulty: index + 1,
           }))
@@ -137,6 +220,21 @@ export function PuzzleCreator() {
           )}
 
           <form onSubmit={handleSubmit}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Publish Date
+              </label>
+              <input
+                type="text"
+                value={publishDate}
+                onChange={(e) => setPublishDate(e.target.value)}
+                placeholder="e.g., 1/30/2026"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                disabled={isLoading}
+              />
+              <p className="mt-1 text-sm text-gray-500">Format: m/d/yyyy</p>
+            </div>
+
             <div className="space-y-8">
               {categories.map((category, categoryIndex) => (
                 <div
@@ -171,10 +269,21 @@ export function PuzzleCreator() {
                               onChange={(e) =>
                                 handleCardChange(categoryIndex, cardIndex, 'name', e.target.value)
                               }
+                              onBlur={(e) =>
+                                handleCardNameLookup(categoryIndex, cardIndex, e.target.value)
+                              }
                               placeholder="e.g., Lightning Bolt"
                               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                               disabled={isLoading}
                             />
+                            {lookupLoading[getLookupKey(categoryIndex, cardIndex)] && (
+                              <div className="mt-2 text-xs text-gray-600">Looking up card…</div>
+                            )}
+                            {lookupErrors[getLookupKey(categoryIndex, cardIndex)] && (
+                              <div className="mt-2 text-xs text-red-600">
+                                {lookupErrors[getLookupKey(categoryIndex, cardIndex)]}
+                              </div>
+                            )}
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -192,6 +301,15 @@ export function PuzzleCreator() {
                             />
                           </div>
                         </div>
+                        {card.imageUrl && (
+                          <div className="mt-3">
+                            <img
+                              src={card.imageUrl}
+                              alt={card.name}
+                              className="w-40 rounded-md border border-gray-200 shadow-sm"
+                            />
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

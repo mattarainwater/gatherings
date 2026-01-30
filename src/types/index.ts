@@ -1,6 +1,7 @@
 export interface Card {
   name: string
   id: string
+  imageUrl?: string
 }
 
 export interface Category {
