@@ -59,12 +59,12 @@ export const SAMPLE_PUZZLE: Category[] = [
         id: '48caf4c4-745c-4072-bf3d-1a3fa7c3bc9c'
       },
       {
-        name: 'Tevesh Szat, Doom of Fools',
-        id: '8f244716-78ab-46f5-b6e9-fc1e6db28052'
+        name: 'Yawgmoth, Thran Physician',
+        id: '8690cbcc-f8fd-41f7-9e28-e61c12b04014'
       },
       {
-        name: 'Kamahl, Fist of Krosa',
-        id: 'c960672d-06ad-4d41-8904-9c007f824756'
+        name: 'Klauth, Unrivaled Ancient',
+        id: '7f5cf828-17b2-4105-9a9a-ee0ab720c2ee'
       },
     ],
     color: 'blue',
@@ -78,8 +78,8 @@ export const SAMPLE_PUZZLE: Category[] = [
         id: 'fb885d30-c6e5-494a-bc01-3d5085b8e262'
       },
       {
-        name: 'Glissa Sunseeker',
-        id: '670c3106-71fc-464e-8c94-81bf7fafc3e6'
+        name: 'Daxos of Meletis',
+        id: 'd2eca63b-7fb2-4a69-84dd-aa0a038a2f8a'
       },
       {
         name: 'Balthor the Stout',
