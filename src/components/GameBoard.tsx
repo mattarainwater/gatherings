@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { WordButton } from './WordButton'
 import { CardPreview } from './CardPreview'
+import { ResultsPopup } from './ResultsPopup'
 import { Card, Category, GameState } from '../types'
 import { getColorClass } from '../utils/gameUtils'
 
@@ -64,34 +65,52 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       )}
 
       {/* Words Grid */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
-        {cards.map(card => {
-          const category = gameState.categories.find(cat =>
-            cat.cards.map(c => c.id).includes(card.id)
-          )
-          
-          const isSelected = gameState.selected.map(c => c.id).includes(card.id)
-          const isSolved = gameState.solved.includes(category?.name || '')
+      {!gameState.gameOver || gameState.won ? (
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {cards.map(card => {
+            const category = gameState.categories.find(cat =>
+              cat.cards.map(c => c.id).includes(card.id)
+            )
+            
+            const isSelected = gameState.selected.map(c => c.id).includes(card.id)
+            const isSolved = gameState.solved.includes(category?.name || '')
 
-          return (
-            <WordButton
-              key={card.id}
-              card={card}
-              selected={isSelected}
-              solved={isSolved}
-              color={isSolved ? getColorClass(category?.color!) : undefined}
-              onClick={() => onWordClick(card)}
-              onHover={setHoveredCard}
-              onLeave={() => setHoveredCard(undefined)}
-            />
-          )
-        })}
-      </div>
+            return (
+              <WordButton
+                key={card.id}
+                card={card}
+                selected={isSelected}
+                solved={isSolved}
+                color={isSolved ? getColorClass(category?.color!) : undefined}
+                onClick={() => onWordClick(card)}
+                onHover={setHoveredCard}
+                onLeave={() => setHoveredCard(undefined)}
+              />
+            )
+          })}
+        </div>
+      ) : null}
 
       {/* Game Over Message */}
       {gameState.gameOver && !gameState.won && (
-        <div className="mb-6 p-4 bg-red-100 text-red-800 rounded text-center font-semibold">
-          Game Over! You made too many mistakes.
+        <div className="mb-6">
+          <div className="p-4 bg-red-100 text-red-800 rounded text-center font-semibold mb-4">
+            Game Over! You made too many mistakes.
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-gray-800 mb-3 text-center">Solution:</h2>
+            {gameState.categories
+              .filter(cat => !gameState.solved.includes(cat.name))
+              .map(cat => (
+                <div
+                  key={cat.name}
+                  className={`${getColorClass(cat.color)} text-black p-3 rounded font-bold text-center`}
+                >
+                  <div>{cat.name}</div>
+                  <div className="text-xs opacity-75">{cat.cards.map(c => c.name).join(' | ')}</div>
+                </div>
+              ))}
+          </div>
         </div>
       )}
 

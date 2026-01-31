@@ -11,6 +11,12 @@ export interface Category {
   difficulty: number
 }
 
+export interface Guess {
+  cards: Card[]
+  correct: boolean
+  oneAway: boolean
+}
+
 export interface GameState {
   categories: Category[]
   selected: Card[]
@@ -19,4 +25,5 @@ export interface GameState {
   gameOver: boolean
   won: boolean
   message: string
+  guesses: Guess[]
 }
