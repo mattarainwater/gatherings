@@ -22,21 +22,77 @@ export const Game: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [puzzleId, setPuzzleId] = useState<string | null>(null)
   const [showResults, setShowResults] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [nextPuzzleDate, setNextPuzzleDate] = useState<string | null>(null)
+  const [prevPuzzleDate, setPrevPuzzleDate] = useState<string | null>(null)
+  const [hasInitialized, setHasInitialized] = useState(false)
+
+  const formatDateForAPI = (date: Date) => {
+    const formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+    return formattedDate;
+  }
+
+  const canNavigatePrevious = prevPuzzleDate !== null
+  const canNavigateNext = nextPuzzleDate !== null
+
+  const parseAPIDate = (dateStr: string): Date => {
+    // Handle ISO format (YYYY-MM-DD or ISO 8601)
+    if (dateStr.includes('-') && (dateStr.includes('T') || dateStr.length === 10)) {
+      // Extract YYYY-MM-DD from ISO string
+      const datePart = dateStr.split('T')[0]
+      const [year, month, day] = datePart.split('-').map(Number)
+      // Create date in local timezone, not UTC
+      return new Date(year, month - 1, day)
+    }
+    // Handle MM/DD/YYYY format
+    const [month, day, year] = dateStr.split('/').map(Number)
+    return new Date(year, month - 1, day)
+  }
+
+  const handlePreviousDay = () => {
+    if (prevPuzzleDate) {
+      console.log('prevPuzzleDate:', prevPuzzleDate)
+      try {
+        const newDate = parseAPIDate(prevPuzzleDate)
+        console.log('Created date:', newDate)
+        setSelectedDate(newDate)
+      } catch (e) {
+        console.error('Failed to parse previous date:', e, prevPuzzleDate)
+      }
+    }
+  }
+
+  const handleNextDay = () => {
+    if (nextPuzzleDate) {
+      console.log('nextPuzzleDate:', nextPuzzleDate)
+      try {
+        const newDate = parseAPIDate(nextPuzzleDate)
+        console.log('Created date:', newDate)
+        setSelectedDate(newDate)
+      } catch (e) {
+        console.error('Failed to parse next date:', e, nextPuzzleDate)
+      }
+    }
+  }
 
   // Fetch puzzle from API and initialize
   useEffect(() => {
     const initializePuzzle = async () => {
+      setLoading(true)
+      setError(null)
       try {
-        const categories = await puzzleService.getPuzzle()
+        const dateToFetch = formatDateForAPI(selectedDate)
+        const puzzleResponse = await puzzleService.getPuzzle(dateToFetch)
+        const categories = puzzleResponse.categories
         
-        // Generate a unique ID for this puzzle based on category names
-        const currentPuzzleId = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
-        setPuzzleId(currentPuzzleId)
+        // Update the navigation dates from API
+        setNextPuzzleDate(puzzleResponse.nextPuzzleDate)
+        setPrevPuzzleDate(puzzleResponse.prevPuzzleDate)
+        setPuzzleId(puzzleResponse.puzzleDate)
         
-        // Try to load saved state from localStorage
-        const savedStateStr = localStorage.getItem('gameState')
-        const savedCardsStr = localStorage.getItem('shuffledCards')
-        const savedPuzzleId = localStorage.getItem('puzzleId')
+        // Try to load saved state from localStorage using date-specific keys
+        const savedStateStr = localStorage.getItem(`gameState_${puzzleResponse.puzzleDate}`)
+        const savedCardsStr = localStorage.getItem(`shuffledCards_${puzzleResponse.puzzleDate}`)
         
         let initialGameState = {
           categories,
@@ -51,8 +107,8 @@ export const Game: React.FC = () => {
         
         let initialCards = categories.flatMap(cat => cat.cards.map(card => card))
         
-        // If saved state exists and it's for the same puzzle, restore it
-        if (savedStateStr && savedCardsStr && savedPuzzleId === currentPuzzleId) {
+        // If saved state exists for this date, restore it
+        if (savedStateStr && savedCardsStr) {
           try {
             const savedState = JSON.parse(savedStateStr)
             const savedCards = JSON.parse(savedCardsStr)
@@ -76,15 +132,16 @@ export const Game: React.FC = () => {
         } else {
           // New puzzle or no saved state, shuffle cards
           initialCards = shuffleArray(initialCards)
-          // Clear old saved state
-          localStorage.removeItem('gameState')
-          localStorage.removeItem('shuffledCards')
-          localStorage.setItem('puzzleId', currentPuzzleId)
         }
         
-        setShowResults(initialGameState.won)
+        setShowResults(initialGameState.won || initialGameState.gameOver)
         setGameState(initialGameState)
         setCards(initialCards)
+        
+        if (!hasInitialized) {
+          setHasInitialized(true)
+        }
+        
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load puzzle')
       } finally {
@@ -92,7 +149,7 @@ export const Game: React.FC = () => {
       }
     }
     initializePuzzle()
-  }, [])
+  }, [selectedDate, hasInitialized])
 
   // Save game state to localStorage whenever it changes
   useEffect(() => {
@@ -105,14 +162,14 @@ export const Game: React.FC = () => {
         guesses: gameState.guesses,
         won: gameState.won,
       }
-      localStorage.setItem('gameState', JSON.stringify(stateToSave))
+      localStorage.setItem(`gameState_${puzzleId}`, JSON.stringify(stateToSave))
     }
   }, [gameState.selected, gameState.solved, gameState.mistakes, gameState.gameOver, gameState.won, gameState.guesses, puzzleId])
 
   // Save shuffled cards to localStorage whenever they change
   useEffect(() => {
     if (puzzleId && cards.length > 0) {
-      localStorage.setItem('shuffledCards', JSON.stringify(cards))
+      localStorage.setItem(`shuffledCards_${puzzleId}`, JSON.stringify(cards))
     }
   }, [cards, puzzleId])
 
@@ -195,6 +252,10 @@ export const Game: React.FC = () => {
 
       const newMistakes = gameState.mistakes + 1
       const gameOver = newMistakes >= 4
+      
+      if (gameOver) {
+        setShowResults(true)
+      }
 
       setGameState(prev => ({
         ...prev,
@@ -225,7 +286,34 @@ export const Game: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 py-8">
+      <div className="mb-4 flex items-center gap-4">
+        <button
+          onClick={handlePreviousDay}
+          disabled={!canNavigatePrevious}
+          className={`px-4 py-2 rounded font-semibold ${
+            canNavigatePrevious
+              ? 'bg-blue-500 text-white hover:bg-blue-600'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          ← Previous Day
+        </button>
+        <span className="text-lg font-semibold">
+          {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+        </span>
+        <button
+          onClick={handleNextDay}
+          disabled={!canNavigateNext}
+          className={`px-4 py-2 rounded font-semibold ${
+            canNavigateNext
+              ? 'bg-blue-500 text-white hover:bg-blue-600'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          Next Day →
+        </button>
+      </div>
       <GameBoard
         gameState={gameState}
         cards={cards.filter(card => !gameState.solved.some(catName =>

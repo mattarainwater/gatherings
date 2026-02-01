@@ -1,6 +1,7 @@
 export interface Card {
   name: string
   id: string
+  scryfall_id: string
   imageUrl?: string
 }
 

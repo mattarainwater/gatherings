@@ -23,7 +23,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card }) => {
 
       try {
         const response = await fetch(
-          `https://api.scryfall.com/cards/${card.id}`
+          `https://api.scryfall.com/cards/${card.scryfall_id}`
         )
         if (response.ok) {
           const data = await response.json()
