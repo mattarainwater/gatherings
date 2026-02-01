@@ -47,20 +47,20 @@ export const WordButton: React.FC<WordButtonProps> = ({
     fetchCardImage()
   }, [card.id])
 
-  const baseClass = 'rounded transition-all cursor-pointer overflow-hidden'
+  const baseClass = 'rounded transition-all cursor-pointer overflow-hidden h-[calc(25vh-60px)]'
 
   if (solved) {
     return (
       <button
         disabled
-        className={`${baseClass} ${color || 'bg-gray-600'} opacity-100 ring-4 ring-offset-2`}
+        className={`${baseClass} ${color || 'bg-gray-600'} opacity-100 ring-4 ring-offset-2 flex items-center justify-center`}
       >
         {loading ? (
-          <div className="w-full h-[calc(25vh-60px)] bg-gray-300 animate-pulse" />
+          <div className="w-full h-full bg-gray-300 animate-pulse" />
         ) : imageUrl ? (
-          <img src={imageUrl} alt={card.name} className="w-full h-[calc(25vh-60px)] object-cover" />
+          <img src={imageUrl} alt={card.name} className="w-full h-full object-contain" />
         ) : (
-          <div className="w-full h-[calc(25vh-60px)] bg-gray-500 flex items-center justify-center text-white text-xs">
+          <div className="w-full h-full bg-gray-500 flex items-center justify-center text-white text-xs">
             {card.name}
           </div>
         )}
@@ -77,14 +77,14 @@ export const WordButton: React.FC<WordButtonProps> = ({
         selected
           ? 'ring-4 ring-yellow-400 ring-offset-2 scale-95'
           : 'ring-2 ring-gray-300 hover:ring-gray-400'
-      }`}
+      } flex items-center justify-center`}
     >
       {loading ? (
-        <div className="w-full h-[calc(25vh-80px)] bg-gray-300 animate-pulse" />
+        <div className="w-full h-full bg-gray-300 animate-pulse" />
       ) : imageUrl ? (
-        <img src={imageUrl} alt={card.name} className="w-full h-[calc(25vh-80px)] object-cover" />
+        <img src={imageUrl} alt={card.name} className="w-full h-full object-contain" />
       ) : (
-        <div className="w-full h-[calc(25vh-80px)] bg-gray-400 flex items-center justify-center text-white text-xs text-center px-2">
+        <div className="w-full h-full bg-gray-400 flex items-center justify-center text-white text-xs text-center px-2">
           {card.name}
         </div>
       )}

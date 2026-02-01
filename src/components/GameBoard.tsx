@@ -18,6 +18,8 @@ interface GameBoardProps {
   onPreviousDay: () => void
   onNextDay: () => void
   isTransitioning: boolean
+  onShowResults: () => void
+  onRestart: () => void
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
@@ -32,7 +34,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   canNavigateNext,
   onPreviousDay,
   onNextDay,
-  isTransitioning
+  isTransitioning,
+  onShowResults,
+  onRestart
 }) => {
   // Get solved categories in the order they were solved
   const solvedCategories = gameState.solved
@@ -49,8 +53,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   return (
     <div className="w-full max-w-6xl mx-auto px-4" onMouseMove={handleMouseMove}>
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="w-full lg:flex-1">
-          <div className="p-4 bg-white rounded-lg shadow-lg">
+        <div className="w-full lg:flex-1 min-w-[800px]">
+          <div className="p-4 bg-white rounded-lg shadow-lg min-h-[calc(100vh-4rem)] flex flex-col">
       {/* Title and Mistakes */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
@@ -118,7 +122,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Words Grid */}
       {!gameState.gameOver || gameState.won ? (
-        <div className="grid grid-cols-4 gap-2 mb-3">
+        <div className="grid grid-cols-4 gap-y-0 gap-x-0 mb-3 w-max mx-auto">
           {cards.map(card => {
             const category = gameState.categories.find(cat =>
               cat.cards.map(c => c.id).includes(card.id)
@@ -173,28 +177,47 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       )}
 
       {/* Controls */}
-      <div className="flex gap-3 justify-center">
-        <button
-          onClick={onShuffle}
-          disabled={gameState.gameOver}
-          className="px-4 py-2 bg-gray-400 text-white rounded font-semibold hover:bg-gray-500 disabled:opacity-50"
-        >
-          Shuffle
-        </button>
-        <button
-          onClick={onDeselect}
-          disabled={gameState.selected.length === 0 || gameState.gameOver}
-          className="px-4 py-2 bg-gray-400 text-white rounded font-semibold hover:bg-gray-500 disabled:opacity-50"
-        >
-          Deselect All
-        </button>
-        <button
-          onClick={onSolve}
-          disabled={gameState.selected.length !== 4 || gameState.gameOver}
-          className="px-4 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 disabled:opacity-50"
-        >
-          Submit
-        </button>
+      <div className="mt-auto pt-4 flex gap-3 justify-center sticky bottom-0 bg-white pb-2">
+        {gameState.gameOver ? (
+          <>
+            <button
+              onClick={onShowResults}
+              className="px-4 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700"
+            >
+              View Results
+            </button>
+            <button
+              onClick={onRestart}
+              className="px-4 py-2 bg-green-600 text-white rounded font-semibold hover:bg-green-700"
+            >
+              Restart Puzzle
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={onShuffle}
+              disabled={gameState.gameOver}
+              className="px-4 py-2 bg-gray-400 text-white rounded font-semibold hover:bg-gray-500 disabled:opacity-50"
+            >
+              Shuffle
+            </button>
+            <button
+              onClick={onDeselect}
+              disabled={gameState.selected.length === 0 || gameState.gameOver}
+              className="px-4 py-2 bg-gray-400 text-white rounded font-semibold hover:bg-gray-500 disabled:opacity-50"
+            >
+              Deselect All
+            </button>
+            <button
+              onClick={onSolve}
+              disabled={gameState.selected.length !== 4 || gameState.gameOver}
+              className="px-4 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+              Submit
+            </button>
+          </>
+        )}
       </div>
           </div>
         </div>

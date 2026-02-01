@@ -277,6 +277,29 @@ export const Game: React.FC = () => {
     }
   }
 
+  const handleRestart = () => {
+    if (puzzleId) {
+      // Clear saved state for this puzzle
+      localStorage.removeItem(`gameState_${puzzleId}`)
+      localStorage.removeItem(`shuffledCards_${puzzleId}`)
+      
+      // Reset game state
+      const initialCards = shuffleArray(gameState.categories.flatMap(cat => cat.cards.map(card => card)))
+      setCards(initialCards)
+      setGameState({
+        categories: gameState.categories,
+        selected: [],
+        solved: [],
+        mistakes: 0,
+        gameOver: false,
+        won: false,
+        message: '',
+        guesses: []
+      })
+      setShowResults(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -311,6 +334,8 @@ export const Game: React.FC = () => {
           onPreviousDay={handlePreviousDay}
           onNextDay={handleNextDay}
           isTransitioning={isTransitioning}
+          onShowResults={() => setShowResults(true)}
+          onRestart={handleRestart}
         />
         {isTransitioning && (
           <div className="absolute inset-0 bg-white bg-opacity-75 rounded-lg flex items-center justify-center">
