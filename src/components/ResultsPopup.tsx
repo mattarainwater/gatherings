@@ -15,7 +15,7 @@ export const ResultsPopup: React.FC<ResultsPopupProps> = ({
   const [copied, setCopied] = useState(false)
 
   const generateResultsText = () => {
-    const status = gameState.won ? '🎉 Won!' : '❌ Lost'
+    const status = gameState.won ? '🎉 Won! 🎉' : '❌ Lost ❌'
 
     // Create the unresolved categories display
     const unresolved = gameState.categories
@@ -69,15 +69,10 @@ export const ResultsPopup: React.FC<ResultsPopupProps> = ({
       })
       .join('\n')
 
-    let text = `Gatherings - ${puzzleDate}
+    let text = `Gatherings
+    ${new Date(puzzleDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
 ${status}
-
 ${guessesText}`
-
-    if (unresolved) {
-      text += `\n\nMissed:\n${unresolved}`
-    }
-
     return text
   }
 
@@ -94,7 +89,7 @@ ${guessesText}`
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
         <h2 className="text-2xl font-bold mb-4 text-center">
-          {gameState.won ? '🎉 You Won!' : '❌ Game Over'}
+          {gameState.won ? '🎉 You Won! 🎉' : '❌ Game Over ❌'}
         </h2>
 
         <div className="mb-6 p-4 bg-gray-100 rounded text-center font-mono text-sm whitespace-pre-line break-words">

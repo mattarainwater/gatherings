@@ -3,11 +3,25 @@ import { Card } from '../types'
 
 interface CardPreviewProps {
   card?: Card
+  mouseX?: number
+  mouseY?: number
 }
 
-export const CardPreview: React.FC<CardPreviewProps> = ({ card }) => {
+export const CardPreview: React.FC<CardPreviewProps> = ({ card, mouseX = 0, mouseY = 0 }) => {
   const [imageUrl, setImageUrl] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -55,21 +69,31 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card }) => {
     }
   }, [card])
 
-  return (
-    <div className="w-full bg-white rounded-lg shadow-lg p-4">
-      <div className="text-sm font-semibold text-gray-700 mb-3">Card Preview</div>
-      {!card && (
-        <div className="text-gray-500 text-sm">Hover a card to preview.</div>
-      )}
-      {card && loading && (
-        <div className="w-full h-64 bg-gray-200 animate-pulse rounded" />
-      )}
-      {card && !loading && imageUrl && (
-        <img src={imageUrl} alt={card.name} className="w-full h-auto rounded" />
-      )}
-      {card && !loading && !imageUrl && (
-        <div className="text-gray-500 text-sm">No image found.</div>
-      )}
-    </div>
-  )
+  // Desktop floating preview
+  if (!isMobile && card && imageUrl) {
+    return (
+      <div
+        className="fixed pointer-events-none z-50"
+        style={{
+          left: `${mouseX + 10}px`,
+          top: `${mouseY + 10}px`,
+        }}
+      >
+        <div className="shadow-2xl rounded-lg overflow-hidden">
+          {loading ? (
+            <div className="w-64 h-96 bg-gray-200 animate-pulse rounded" />
+          ) : (
+            <img
+              src={imageUrl}
+              alt={card.name}
+              className="w-64 h-auto rounded"
+            />
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Mobile: show nothing (disabled on mobile)
+  return null
 }

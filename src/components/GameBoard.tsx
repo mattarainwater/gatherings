@@ -28,16 +28,21 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     .filter((cat): cat is Category => cat !== undefined)
 
   const [hoveredCard, setHoveredCard] = useState<Card | undefined>(undefined)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY })
+  }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4">
+    <div className="w-full max-w-6xl mx-auto px-4" onMouseMove={handleMouseMove}>
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         <div className="w-full lg:flex-1">
-          <div className="p-6 bg-white rounded-lg shadow-lg">
+          <div className="p-4 bg-white rounded-lg shadow-lg">
       {/* Title and Mistakes */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Gatherings</h1>
-        <div className="text-lg font-semibold text-gray-600">
+      <div className="mb-3">
+        <h1 className="text-2xl font-bold text-gray-800 mb-1">Gatherings</h1>
+        <div className="text-base font-semibold text-gray-600">
           Mistakes: {gameState.mistakes}/4
         </div>
         {gameState.message && (
@@ -51,7 +56,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Solved Categories */}
       {solvedCategories && solvedCategories.length > 0 && (
-        <div className="mb-6 space-y-2">
+        <div className="mb-3 space-y-1">
           {solvedCategories.map(cat => (
             <div
               key={cat.name}
@@ -66,7 +71,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Words Grid */}
       {!gameState.gameOver || gameState.won ? (
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-4 gap-2 mb-3">
           {cards.map(card => {
             const category = gameState.categories.find(cat =>
               cat.cards.map(c => c.id).includes(card.id)
@@ -146,9 +151,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       </div>
           </div>
         </div>
-        <div className="w-full lg:w-80">
-          <CardPreview card={hoveredCard} />
-        </div>
+        <CardPreview card={hoveredCard} mouseX={mousePos.x} mouseY={mousePos.y} />
       </div>
     </div>
   )

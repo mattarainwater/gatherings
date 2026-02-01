@@ -56,11 +56,11 @@ export const WordButton: React.FC<WordButtonProps> = ({
         className={`${baseClass} ${color || 'bg-gray-600'} opacity-100 ring-4 ring-offset-2`}
       >
         {loading ? (
-          <div className="w-full h-32 bg-gray-300 animate-pulse" />
+          <div className="w-full h-[calc(25vh-60px)] bg-gray-300 animate-pulse" />
         ) : imageUrl ? (
-          <img src={imageUrl} alt={card.name} className="w-full h-auto" />
+          <img src={imageUrl} alt={card.name} className="w-full h-[calc(25vh-60px)] object-cover" />
         ) : (
-          <div className="w-full h-32 bg-gray-500 flex items-center justify-center text-white text-sm">
+          <div className="w-full h-[calc(25vh-60px)] bg-gray-500 flex items-center justify-center text-white text-xs">
             {card.name}
           </div>
         )}
@@ -80,11 +80,11 @@ export const WordButton: React.FC<WordButtonProps> = ({
       }`}
     >
       {loading ? (
-        <div className="w-full h-32 bg-gray-300 animate-pulse" />
+        <div className="w-full h-[calc(25vh-80px)] bg-gray-300 animate-pulse" />
       ) : imageUrl ? (
-        <img src={imageUrl} alt={card.name} className="w-full h-auto" />
+        <img src={imageUrl} alt={card.name} className="w-full h-[calc(25vh-80px)] object-cover" />
       ) : (
-        <div className="w-full h-32 bg-gray-400 flex items-center justify-center text-white text-sm text-center px-2">
+        <div className="w-full h-[calc(25vh-80px)] bg-gray-400 flex items-center justify-center text-white text-xs text-center px-2">
           {card.name}
         </div>
       )}

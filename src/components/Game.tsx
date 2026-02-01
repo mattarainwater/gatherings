@@ -26,6 +26,7 @@ export const Game: React.FC = () => {
   const [nextPuzzleDate, setNextPuzzleDate] = useState<string | null>(null)
   const [prevPuzzleDate, setPrevPuzzleDate] = useState<string | null>(null)
   const [hasInitialized, setHasInitialized] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   const formatDateForAPI = (date: Date) => {
     const formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
@@ -52,12 +53,14 @@ export const Game: React.FC = () => {
   const handlePreviousDay = () => {
     if (prevPuzzleDate) {
       console.log('prevPuzzleDate:', prevPuzzleDate)
+      setIsTransitioning(true)
       try {
         const newDate = parseAPIDate(prevPuzzleDate)
         console.log('Created date:', newDate)
         setSelectedDate(newDate)
       } catch (e) {
         console.error('Failed to parse previous date:', e, prevPuzzleDate)
+        setIsTransitioning(false)
       }
     }
   }
@@ -65,12 +68,14 @@ export const Game: React.FC = () => {
   const handleNextDay = () => {
     if (nextPuzzleDate) {
       console.log('nextPuzzleDate:', nextPuzzleDate)
+      setIsTransitioning(true)
       try {
         const newDate = parseAPIDate(nextPuzzleDate)
         console.log('Created date:', newDate)
         setSelectedDate(newDate)
       } catch (e) {
         console.error('Failed to parse next date:', e, nextPuzzleDate)
+        setIsTransitioning(false)
       }
     }
   }
@@ -78,7 +83,9 @@ export const Game: React.FC = () => {
   // Fetch puzzle from API and initialize
   useEffect(() => {
     const initializePuzzle = async () => {
-      setLoading(true)
+      if (!hasInitialized) {
+        setLoading(true)
+      }
       setError(null)
       try {
         const dateToFetch = formatDateForAPI(selectedDate)
@@ -146,6 +153,7 @@ export const Game: React.FC = () => {
         setError(err instanceof Error ? err.message : 'Failed to load puzzle')
       } finally {
         setLoading(false)
+        setIsTransitioning(false)
       }
     }
     initializePuzzle()
@@ -290,9 +298,9 @@ export const Game: React.FC = () => {
       <div className="mb-4 flex items-center gap-4">
         <button
           onClick={handlePreviousDay}
-          disabled={!canNavigatePrevious}
+          disabled={!canNavigatePrevious || isTransitioning}
           className={`px-4 py-2 rounded font-semibold ${
-            canNavigatePrevious
+            canNavigatePrevious && !isTransitioning
               ? 'bg-blue-500 text-white hover:bg-blue-600'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
@@ -304,9 +312,9 @@ export const Game: React.FC = () => {
         </span>
         <button
           onClick={handleNextDay}
-          disabled={!canNavigateNext}
+          disabled={!canNavigateNext || isTransitioning}
           className={`px-4 py-2 rounded font-semibold ${
-            canNavigateNext
+            canNavigateNext && !isTransitioning
               ? 'bg-blue-500 text-white hover:bg-blue-600'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
@@ -314,16 +322,26 @@ export const Game: React.FC = () => {
           Next Day →
         </button>
       </div>
-      <GameBoard
-        gameState={gameState}
-        cards={cards.filter(card => !gameState.solved.some(catName =>
-          gameState.categories.find(cat => cat.name === catName)?.cards.map(c => c.id).includes(card.id)
-        ))}
-        onWordClick={handleWordClick}
-        onSolve={handleSolve}
-        onShuffle={handleShuffle}
-        onDeselect={handleDeselect}
-      />
+      <div className="relative">
+        <GameBoard
+          gameState={gameState}
+          cards={cards.filter(card => !gameState.solved.some(catName =>
+            gameState.categories.find(cat => cat.name === catName)?.cards.map(c => c.id).includes(card.id)
+          ))}
+          onWordClick={handleWordClick}
+          onSolve={handleSolve}
+          onShuffle={handleShuffle}
+          onDeselect={handleDeselect}
+        />
+        {isTransitioning && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 rounded-lg flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              <span className="text-sm text-gray-600">Loading puzzle...</span>
+            </div>
+          </div>
+        )}
+      </div>
       {(showResults) && (
         <ResultsPopup
           gameState={gameState}
