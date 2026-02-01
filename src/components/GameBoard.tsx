@@ -12,6 +12,12 @@ interface GameBoardProps {
   onSolve: () => void
   onShuffle: () => void
   onDeselect: () => void
+  selectedDate: Date
+  canNavigatePrevious: boolean
+  canNavigateNext: boolean
+  onPreviousDay: () => void
+  onNextDay: () => void
+  isTransitioning: boolean
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
@@ -20,7 +26,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   onWordClick,
   onSolve,
   onShuffle,
-  onDeselect
+  onDeselect,
+  selectedDate,
+  canNavigatePrevious,
+  canNavigateNext,
+  onPreviousDay,
+  onNextDay,
+  isTransitioning
 }) => {
   // Get solved categories in the order they were solved
   const solvedCategories = gameState.solved
@@ -41,8 +53,43 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           <div className="p-4 bg-white rounded-lg shadow-lg">
       {/* Title and Mistakes */}
       <div className="mb-3">
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Gatherings</h1>
-        <div className="text-base font-semibold text-gray-600">
+        <div className="flex items-center justify-between mb-1">
+          <button
+            onClick={onPreviousDay}
+            disabled={!canNavigatePrevious || isTransitioning}
+            className={`p-1 ${
+              canNavigatePrevious && !isTransitioning
+                ? 'text-blue-500 hover:text-blue-600 cursor-pointer'
+                : 'text-gray-300 cursor-not-allowed'
+            }`}
+            aria-label="Previous Day"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="flex flex-col items-center">
+            <h1 className="text-2xl font-bold text-gray-800">Gatherings</h1>
+            <span className="text-sm text-gray-500">
+              {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
+          </div>
+          <button
+            onClick={onNextDay}
+            disabled={!canNavigateNext || isTransitioning}
+            className={`p-1 ${
+              canNavigateNext && !isTransitioning
+                ? 'text-blue-500 hover:text-blue-600 cursor-pointer'
+                : 'text-gray-300 cursor-not-allowed'
+            }`}
+            aria-label="Next Day"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        <div className="text-base font-semibold text-gray-600 text-center">
           Mistakes: {gameState.mistakes}/4
         </div>
         {gameState.message && (

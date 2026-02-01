@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Card } from '../types'
 
 interface CardPreviewProps {
@@ -11,6 +11,8 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card, mouseX = 0, mous
   const [imageUrl, setImageUrl] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const previewRef = useRef<HTMLDivElement>(null)
 
   // Detect mobile on mount and window resize
   useEffect(() => {
@@ -69,14 +71,50 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card, mouseX = 0, mous
     }
   }, [card])
 
+  // Calculate optimal position to keep preview on screen
+  useEffect(() => {
+    if (!previewRef.current || !card || !imageUrl) return
+
+    const rect = previewRef.current.getBoundingClientRect()
+    const previewWidth = rect.width || 256 // w-64 = 256px
+    const previewHeight = rect.height || 384 // h-96 = 384px
+    const offset = 10
+
+    let x = mouseX + offset
+    let y = mouseY + offset
+
+    // Check if preview goes off right edge
+    if (x + previewWidth > window.innerWidth) {
+      x = mouseX - previewWidth - offset
+    }
+
+    // Check if preview goes off bottom edge
+    if (y + previewHeight > window.innerHeight) {
+      y = mouseY - previewHeight - offset
+    }
+
+    // Check if preview goes off left edge
+    if (x < 0) {
+      x = offset
+    }
+
+    // Check if preview goes off top edge
+    if (y < 0) {
+      y = offset
+    }
+
+    setPosition({ x, y })
+  }, [mouseX, mouseY, card, imageUrl])
+
   // Desktop floating preview
   if (!isMobile && card && imageUrl) {
     return (
       <div
+        ref={previewRef}
         className="fixed pointer-events-none z-50"
         style={{
-          left: `${mouseX + 10}px`,
-          top: `${mouseY + 10}px`,
+          left: `${position.x}px`,
+          top: `${position.y}px`,
         }}
       >
         <div className="shadow-2xl rounded-lg overflow-hidden">
@@ -86,7 +124,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card, mouseX = 0, mous
             <img
               src={imageUrl}
               alt={card.name}
-              className="w-64 h-auto rounded"
+              className="w-96 h-auto rounded"
             />
           )}
         </div>

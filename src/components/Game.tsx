@@ -295,33 +295,6 @@ export const Game: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 py-8">
-      <div className="mb-4 flex items-center gap-4">
-        <button
-          onClick={handlePreviousDay}
-          disabled={!canNavigatePrevious || isTransitioning}
-          className={`px-4 py-2 rounded font-semibold ${
-            canNavigatePrevious && !isTransitioning
-              ? 'bg-blue-500 text-white hover:bg-blue-600'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          ← Previous Day
-        </button>
-        <span className="text-lg font-semibold">
-          {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-        </span>
-        <button
-          onClick={handleNextDay}
-          disabled={!canNavigateNext || isTransitioning}
-          className={`px-4 py-2 rounded font-semibold ${
-            canNavigateNext && !isTransitioning
-              ? 'bg-blue-500 text-white hover:bg-blue-600'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          Next Day →
-        </button>
-      </div>
       <div className="relative">
         <GameBoard
           gameState={gameState}
@@ -332,6 +305,12 @@ export const Game: React.FC = () => {
           onSolve={handleSolve}
           onShuffle={handleShuffle}
           onDeselect={handleDeselect}
+          selectedDate={selectedDate}
+          canNavigatePrevious={canNavigatePrevious}
+          canNavigateNext={canNavigateNext}
+          onPreviousDay={handlePreviousDay}
+          onNextDay={handleNextDay}
+          isTransitioning={isTransitioning}
         />
         {isTransitioning && (
           <div className="absolute inset-0 bg-white bg-opacity-75 rounded-lg flex items-center justify-center">
