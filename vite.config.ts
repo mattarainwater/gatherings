@@ -4,7 +4,6 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: command === 'serve' ? '/' : 'https://mattarainwater.github.io/gatherings/',
   server: { port: 3000 },
   build: {
     rollupOptions: {

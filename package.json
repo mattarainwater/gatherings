@@ -1,7 +1,6 @@
 {
   "name": "magic-connections",
   "version": "0.0.1",
-  "homepage": "https://mattarainwater.github.io/gatherings/",
   "private": true,
   "scripts": {
     "dev": "vite",
