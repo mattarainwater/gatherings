@@ -51,12 +51,12 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   }
 
   return (
-    <div className="w-full h-screen sm:max-w-6xl sm:mx-auto mx-0 px-0 sm:px-4" onMouseMove={handleMouseMove}>
-      <div className="flex flex-col lg:flex-row gap-6 items-start h-full sm:h-auto w-full">
+    <div className="sm:max-w-6xl sm:mx-auto mx-0 px-0 sm:px-4" onMouseMove={handleMouseMove}>
+      <div className="flex flex-col lg:flex-row gap-6 items-start h-full w-full">
         <div className="w-full lg:flex-1">
-          <div className="px-0 sm:px-4 py-3 sm:py-4 bg-white dark:bg-gray-900 sm:rounded-lg sm:shadow-lg min-h-screen sm:min-h-[calc(100vh-4rem)] flex flex-col transition-colors">
+          <div className="px-0 sm:px-4 py-3 sm:py-4 bg-white dark:bg-gray-900 sm:rounded-lg sm:shadow-lg h-full flex flex-col transition-colors">
       {/* Title and Mistakes */}
-      <div className="mb-3">
+      <div className="mb-3 w-full md:w-[33vw] mx-auto">
         <div className="flex items-center justify-between mb-1">
           <button
             onClick={onPreviousDay}
@@ -94,25 +94,20 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         <div className="text-base font-semibold text-gray-600 dark:text-gray-300 text-center">
           Mistakes: {gameState.mistakes}/4
         </div>
-        {gameState.message && (
-          <div className={`mt-2 text-sm font-semibold ${
-            gameState.message.includes('Correct') ? 'text-green-600' : 'text-red-600'
-          }`}>
-            {gameState.message}
-          </div>
-        )}
       </div>
 
-      {/* Solved Categories */}
+      {/* Board Content Container */}
+      <div className="relative flex-1">
+        {/* Solved Categories */}
       {solvedCategories && solvedCategories.length > 0 && (
-        <div className="mb-3 space-y-1">
+        <div className="mb-3 space-y-1 w-full md:w-[33vw] mx-auto">
           {solvedCategories.map(cat => (
             <div
               key={cat.name}
-              className={`${getColorClass(cat.color)} text-black p-3 rounded font-bold text-center uppercase text-lg`}
+              className={`${getColorClass(cat.color)} text-black p-3 rounded font-bold text-center uppercase text-lg w-full`}
             >
-              <div>{cat.name}</div>
-              <div className="text-sm opacity-75">{cat.cards.map(c => c.name).join(' | ')}</div>
+              <div className="break-words">{cat.name}</div>
+              <div className="text-sm opacity-75 break-words">{cat.cards.map(c => c.name).join(' | ')}</div>
             </div>
           ))}
         </div>
@@ -120,7 +115,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Words Grid */}
       {!gameState.gameOver || gameState.won ? (
-        <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-3 w-full sm:max-w-[640px] md:max-w-[720px] lg:max-w-[800px] mx-auto">
+        <div className="grid grid-cols-4 gap-2 mb-3 w-full md:w-[33vw] mx-auto">
           {cards.map(card => {
             const category = gameState.categories.find(cat =>
               cat.cards.map(c => c.id).includes(card.id)
@@ -176,7 +171,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Controls */}
       <div className="mt-auto pt-4 flex gap-3 justify-center sticky bottom-0 bg-white dark:bg-gray-900 pb-2">
-        {gameState.gameOver ? (
+        {gameState.message ? (
+          <div className={`px-4 py-2 text-lg font-bold ${
+            gameState.message.includes('Correct') ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {gameState.message}
+          </div>
+        ) : gameState.gameOver ? (
           <>
             <button
               onClick={onShowResults}
@@ -216,6 +217,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             </button>
           </>
         )}
+      </div>
+      {/* Loading Overlay */}
+      {isTransitioning && (
+        <div className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-100 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Loading puzzle...</span>
+          </div>
+        </div>
+      )}
       </div>
           </div>
         </div>

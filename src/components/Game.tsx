@@ -207,7 +207,6 @@ export const Game: React.FC = () => {
           initialCards = shuffleArray(initialCards)
         }
         
-        setShowResults(initialGameState.won || initialGameState.gameOver)
         setGameState(initialGameState)
         setCards(initialCards)
         
@@ -383,9 +382,9 @@ export const Game: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 sm:bg-gray-100 sm:dark:bg-gray-800 transition-colors">
+    <div className="flex flex-col bg-white dark:bg-gray-900 sm:bg-gray-100 sm:dark:bg-gray-800 transition-colors min-h-screen">
       <Header />
-      <div className="relative w-full sm:w-auto flex-1 mx-auto py-0 sm:py-8">
+      <div className="flex-1 relative w-800 mx-auto py-0 sm:py-8">
         <GameBoard
           gameState={gameState}
           cards={cards.filter(card => !gameState.solved.some(catName =>
@@ -404,14 +403,6 @@ export const Game: React.FC = () => {
           onShowResults={() => setShowResults(true)}
           onRestart={handleRestart}
         />
-        {isTransitioning && (
-          <div className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 rounded-lg flex items-center justify-center">
-            <div className="flex flex-col items-center gap-3">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Loading puzzle...</span>
-            </div>
-          </div>
-        )}
       </div>
       {(showResults) && (
         <ResultsPopup

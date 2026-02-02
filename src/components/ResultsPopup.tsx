@@ -14,6 +14,20 @@ export const ResultsPopup: React.FC<ResultsPopupProps> = ({
 }) => {
   const [copied, setCopied] = useState(false)
 
+  const parseAPIDate = (dateStr: string): Date => {
+    // Handle ISO format (YYYY-MM-DD or ISO 8601)
+    if (dateStr.includes('-') && (dateStr.includes('T') || dateStr.length === 10)) {
+      // Extract YYYY-MM-DD from ISO string
+      const datePart = dateStr.split('T')[0]
+      const [year, month, day] = datePart.split('-').map(Number)
+      // Create date in local timezone, not UTC
+      return new Date(year, month - 1, day)
+    }
+    // Handle MM/DD/YYYY format
+    const [month, day, year] = dateStr.split('/').map(Number)
+    return new Date(year, month - 1, day)
+  }
+
   const generateResultsText = () => {
     const status = gameState.won ? '🎉 Won! 🎉' : '❌ Lost ❌'
 
@@ -70,7 +84,7 @@ export const ResultsPopup: React.FC<ResultsPopupProps> = ({
       .join('\n')
 
     let text = `Gatherings
-    ${new Date(puzzleDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+    ${parseAPIDate(puzzleDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
 ${status}
 ${guessesText}`
     return text

@@ -47,7 +47,7 @@ export const WordButton: React.FC<WordButtonProps> = ({
     fetchCardImage()
   }, [card.id])
 
-  const baseClass = 'rounded transition-all cursor-pointer overflow-hidden h-[clamp(130px,35vw,220px)] sm:h-[clamp(80px,14vw,160px)]'
+  const baseClass = 'rounded transition-all cursor-pointer overflow-hidden aspect-[5/7]'
 
   if (solved) {
     return (
