@@ -75,7 +75,7 @@ export const ArchivePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
       <Header />
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-6">Gatherings Archive</h1>
+        <h1 className="text-3xl font-bold text-center mb-6">Archive</h1>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
           Browse past puzzles and jump directly to a specific date.
         </p>
