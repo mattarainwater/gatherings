@@ -279,6 +279,35 @@ export const Game: React.FC = () => {
     setGameState(prev => ({ ...prev, selected: [] }))
   }
 
+  const trackPuzzleCompletion = (won: boolean, solvedCategories: string[]) => {
+    // Ensure gtag is available
+    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+      const categoriesCorrect = solvedCategories.map(categoryName => {
+        const category = gameState.categories.find(cat => cat.name === categoryName)
+        return {
+          name: categoryName,
+          color: category?.color || 'unknown'
+        }
+      })
+      
+      const categoriesIncorrect = gameState.categories
+        .filter(cat => !solvedCategories.includes(cat.name))
+        .map(cat => ({
+          name: cat.name,
+          color: cat.color
+        }))
+
+      ;(window as any).gtag('event', 'finish_puzzle', {
+        result: won ? 'won' : 'lost',
+        mistakes: gameState.mistakes + (won ? 0 : 1),
+        categories_solved: categoriesCorrect.length,
+        categories_correct: categoriesCorrect.map(c => `${c.name} (${c.color})`).join(', '),
+        categories_incorrect: categoriesIncorrect.map(c => `${c.name} (${c.color})`).join(', '),
+        puzzle_date: puzzleId || 'unknown'
+      })
+    }
+  }
+
   const handleSolve = () => {
     if (gameState.selected.length !== 4 || gameState.gameOver) return
 
@@ -300,6 +329,12 @@ export const Game: React.FC = () => {
       const newSolved = [...gameState.solved, foundCategory.name]
       const isGameWon = newSolved.length === 4
       setShowResults(isGameWon)
+      
+      // Track puzzle completion if game is won
+      if (isGameWon) {
+        trackPuzzleCompletion(true, newSolved)
+      }
+      
       setGameState(prev => ({
         ...prev,
         selected: [],
@@ -328,6 +363,8 @@ export const Game: React.FC = () => {
       
       if (gameOver) {
         setShowResults(true)
+        // Track puzzle completion if game is lost
+        trackPuzzleCompletion(false, gameState.solved)
       }
 
       setGameState(prev => ({
