@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDarkMode } from '../contexts/DarkModeContext'
 import { HowToPlayPopup } from './HowToPlayPopup'
 
 export const Header: React.FC = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode()
   const [showHowToPlay, setShowHowToPlay] = useState(false)
+  const navigate = useNavigate()
 
   // Get today's date in Central Time
   const getTodayInCentralTime = () => {
@@ -17,19 +18,24 @@ export const Header: React.FC = () => {
     return `${year}-${month}-${day}`
   }
 
-  const todayUrl = `/?date=${getTodayInCentralTime()}`
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const todayUrl = `/?date=${getTodayInCentralTime()}&t=${Date.now()}`
+    navigate(todayUrl, { replace: false })
+  }
 
   return (
     <>
       <header className="w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 transition-colors">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <Link
-            to={todayUrl}
-            className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100"
+          <a
+            href={`/?date=${getTodayInCentralTime()}`}
+            onClick={handleLogoClick}
+            className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 cursor-pointer"
             aria-label="Gatherings home"
           >
             Gatherings
-          </Link>
+          </a>
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowHowToPlay(true)}

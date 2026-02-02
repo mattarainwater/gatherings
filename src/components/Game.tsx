@@ -87,11 +87,9 @@ export const Game: React.FC = () => {
       // When there's a date param, parse and set it
       try {
         const targetDate = parseAPIDate(dateParam)
-        if (formatDateForAPI(targetDate) !== formatDateForAPI(selectedDate)) {
-          setIsTransitioning(true)
-          setSelectedDate(targetDate)
-          setRefreshKey(prev => prev + 1)
-        }
+        setIsTransitioning(true)
+        setSelectedDate(targetDate)
+        setRefreshKey(prev => prev + 1)
       } catch {
         setIsTransitioning(true)
         setSelectedDate(new Date())
