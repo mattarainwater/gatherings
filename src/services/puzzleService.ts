@@ -18,6 +18,10 @@ export interface PuzzleResponse {
   prevPuzzleDate: string | null
 }
 
+export interface PuzzleDateListResponse {
+  dates: string[]
+}
+
 const API_BASE_URL = 'https://9sengzv8jb.execute-api.us-east-2.amazonaws.com/prod'
 
 export const puzzleService = {
@@ -31,7 +35,6 @@ export const puzzleService = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': import.meta.env.VITE_API_KEY || '',
       },
     })
 
@@ -41,6 +44,24 @@ export const puzzleService = {
       puzzleDate: data.result.puzzle.publish_date,
       nextPuzzleDate: data.result.nextPuzzleDate || null,
       prevPuzzleDate: data.result.prevPuzzleDate || null,
+    }
+  },
+
+  getAllPuzzleDates: async (): Promise<PuzzleDateListResponse> => {
+    const url = new URL(`${API_BASE_URL}/puzzles`)
+    url.searchParams.append('all', 'all')
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const data = await response.json()
+
+    return {
+      dates: (data.result || []).map((item: { publish_date: string }) => item.publish_date),
     }
   },
 

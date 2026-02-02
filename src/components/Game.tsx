@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { GameBoard } from './GameBoard'
 import { GameState, Category, Card } from '../types'
 import { shuffleArray } from '../utils/gameUtils'
 import { puzzleService } from '../services/puzzleService'
 import { ResultsPopup } from './ResultsPopup'
 import { Footer } from './Footer'
+import { Header } from './Header'
 
 export const Game: React.FC = () => {
+  const location = useLocation()
   const [gameState, setGameState] = useState<GameState>({
     categories: [],
     selected: [],
@@ -23,11 +26,27 @@ export const Game: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [puzzleId, setPuzzleId] = useState<string | null>(null)
   const [showResults, setShowResults] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const params = new URLSearchParams(window.location.search)
+    const dateParam = params.get('date')
+    if (dateParam) {
+      try {
+        return parseAPIDate(dateParam)
+      } catch {
+        return new Date()
+      }
+    }
+    return new Date()
+  })
+  const [useDefaultPuzzle, setUseDefaultPuzzle] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return !params.get('date')
+  })
   const [nextPuzzleDate, setNextPuzzleDate] = useState<string | null>(null)
   const [prevPuzzleDate, setPrevPuzzleDate] = useState<string | null>(null)
   const [hasInitialized, setHasInitialized] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const formatDateForAPI = (date: Date) => {
     const formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
@@ -37,7 +56,51 @@ export const Game: React.FC = () => {
   const canNavigatePrevious = prevPuzzleDate !== null
   const canNavigateNext = nextPuzzleDate !== null
 
-  const parseAPIDate = (dateStr: string): Date => {
+  const formatDateForURL = (dateStr: string) => {
+    // Convert API date format to YYYY-MM-DD for URL
+    const date = parseAPIDate(dateStr)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const updateDateQueryParam = (dateStr: string) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('date', formatDateForURL(dateStr))
+    window.history.replaceState({}, '', url.toString())
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const dateParam = params.get('date')
+    const shouldUseDefault = !dateParam
+    
+    setUseDefaultPuzzle(shouldUseDefault)
+
+    if (shouldUseDefault) {
+      // When navigating to root without date param, force refresh to get current puzzle
+      setIsTransitioning(true)
+      setSelectedDate(new Date())
+      setRefreshKey(prev => prev + 1)
+    } else {
+      // When there's a date param, parse and set it
+      try {
+        const targetDate = parseAPIDate(dateParam)
+        if (formatDateForAPI(targetDate) !== formatDateForAPI(selectedDate)) {
+          setIsTransitioning(true)
+          setSelectedDate(targetDate)
+          setRefreshKey(prev => prev + 1)
+        }
+      } catch {
+        setIsTransitioning(true)
+        setSelectedDate(new Date())
+        setRefreshKey(prev => prev + 1)
+      }
+    }
+  }, [location.search])
+
+  function parseAPIDate(dateStr: string): Date {
     // Handle ISO format (YYYY-MM-DD or ISO 8601)
     if (dateStr.includes('-') && (dateStr.includes('T') || dateStr.length === 10)) {
       // Extract YYYY-MM-DD from ISO string
@@ -55,6 +118,7 @@ export const Game: React.FC = () => {
     if (prevPuzzleDate) {
       console.log('prevPuzzleDate:', prevPuzzleDate)
       setIsTransitioning(true)
+      setUseDefaultPuzzle(false)
       try {
         const newDate = parseAPIDate(prevPuzzleDate)
         console.log('Created date:', newDate)
@@ -70,6 +134,7 @@ export const Game: React.FC = () => {
     if (nextPuzzleDate) {
       console.log('nextPuzzleDate:', nextPuzzleDate)
       setIsTransitioning(true)
+      setUseDefaultPuzzle(false)
       try {
         const newDate = parseAPIDate(nextPuzzleDate)
         console.log('Created date:', newDate)
@@ -89,14 +154,16 @@ export const Game: React.FC = () => {
       }
       setError(null)
       try {
-        const dateToFetch = formatDateForAPI(selectedDate)
-        const puzzleResponse = await puzzleService.getPuzzle(dateToFetch)
+        const puzzleResponse = useDefaultPuzzle
+          ? await puzzleService.getPuzzle()
+          : await puzzleService.getPuzzle(formatDateForAPI(selectedDate))
         const categories = puzzleResponse.categories
         
         // Update the navigation dates from API
         setNextPuzzleDate(puzzleResponse.nextPuzzleDate)
         setPrevPuzzleDate(puzzleResponse.prevPuzzleDate)
         setPuzzleId(puzzleResponse.puzzleDate)
+        updateDateQueryParam(puzzleResponse.puzzleDate)
         
         // Try to load saved state from localStorage using date-specific keys
         const savedStateStr = localStorage.getItem(`gameState_${puzzleResponse.puzzleDate}`)
@@ -158,7 +225,7 @@ export const Game: React.FC = () => {
       }
     }
     initializePuzzle()
-  }, [selectedDate, hasInitialized])
+  }, [selectedDate, hasInitialized, useDefaultPuzzle, refreshKey])
 
   // Save game state to localStorage whenever it changes
   useEffect(() => {
@@ -318,8 +385,9 @@ export const Game: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900 sm:bg-gray-100 sm:dark:bg-gray-800 py-0 sm:py-8 transition-colors">
-      <div className="relative w-full sm:w-auto">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 sm:bg-gray-100 sm:dark:bg-gray-800 transition-colors">
+      <Header />
+      <div className="relative w-full sm:w-auto flex-1 mx-auto py-0 sm:py-8">
         <GameBoard
           gameState={gameState}
           cards={cards.filter(card => !gameState.solved.some(catName =>

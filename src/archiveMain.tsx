@@ -1,16 +1,13 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import './index.css'
+import { ArchivePage } from './components/ArchivePage'
 import { DarkModeProvider } from './contexts/DarkModeContext'
+import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <DarkModeProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ArchivePage />
     </DarkModeProvider>
   </React.StrictMode>
 )

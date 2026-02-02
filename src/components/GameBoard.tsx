@@ -73,10 +73,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             </svg>
           </button>
           <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Gatherings</h1>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </span>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h1>
           </div>
           <button
             onClick={onNextDay}
