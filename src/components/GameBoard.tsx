@@ -51,10 +51,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4" onMouseMove={handleMouseMove}>
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="w-full lg:flex-1 min-w-[800px]">
-          <div className="p-4 bg-white rounded-lg shadow-lg min-h-[calc(100vh-4rem)] flex flex-col">
+    <div className="w-full h-screen sm:max-w-6xl sm:mx-auto mx-0 px-0 sm:px-4" onMouseMove={handleMouseMove}>
+      <div className="flex flex-col lg:flex-row gap-6 items-start h-full sm:h-auto w-full">
+        <div className="w-full lg:flex-1">
+          <div className="px-0 sm:px-4 py-3 sm:py-4 bg-white sm:rounded-lg sm:shadow-lg min-h-screen sm:min-h-[calc(100vh-4rem)] flex flex-col">
       {/* Title and Mistakes */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
@@ -122,7 +122,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Words Grid */}
       {!gameState.gameOver || gameState.won ? (
-        <div className="grid grid-cols-4 gap-y-0 gap-x-0 mb-3 w-max mx-auto">
+        <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-3 w-full sm:max-w-[640px] md:max-w-[720px] lg:max-w-[800px] mx-auto">
           {cards.map(card => {
             const category = gameState.categories.find(cat =>
               cat.cards.map(c => c.id).includes(card.id)

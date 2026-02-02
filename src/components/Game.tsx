@@ -317,8 +317,8 @@ export const Game: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 py-8">
-      <div className="relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white sm:bg-gray-100 py-0 sm:py-8">
+      <div className="relative w-full sm:w-auto">
         <GameBoard
           gameState={gameState}
           cards={cards.filter(card => !gameState.solved.some(catName =>

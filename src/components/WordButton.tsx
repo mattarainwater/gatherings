@@ -47,7 +47,7 @@ export const WordButton: React.FC<WordButtonProps> = ({
     fetchCardImage()
   }, [card.id])
 
-  const baseClass = 'rounded transition-all cursor-pointer overflow-hidden h-[calc(25vh-60px)]'
+  const baseClass = 'rounded transition-all cursor-pointer overflow-hidden h-[clamp(130px,35vw,220px)] sm:h-[clamp(80px,14vw,160px)]'
 
   if (solved) {
     return (
@@ -58,7 +58,7 @@ export const WordButton: React.FC<WordButtonProps> = ({
         {loading ? (
           <div className="w-full h-full bg-gray-300 animate-pulse" />
         ) : imageUrl ? (
-          <img src={imageUrl} alt={card.name} className="w-full h-full object-contain" />
+          <img src={imageUrl} alt={card.name} className="w-full h-full object-cover sm:object-contain object-center" />
         ) : (
           <div className="w-full h-full bg-gray-500 flex items-center justify-center text-white text-xs">
             {card.name}
@@ -80,11 +80,11 @@ export const WordButton: React.FC<WordButtonProps> = ({
       } flex items-center justify-center`}
     >
       {loading ? (
-        <div className="w-full h-full bg-gray-300 animate-pulse" />
+        <div className="h-full bg-gray-300 animate-pulse" />
       ) : imageUrl ? (
-        <img src={imageUrl} alt={card.name} className="w-full h-full object-contain" />
+        <img src={imageUrl} alt={card.name} className="h-full w-full object-cover sm:object-contain object-center" />
       ) : (
-        <div className="w-full h-full bg-gray-400 flex items-center justify-center text-white text-xs text-center px-2">
+        <div className="h-full bg-gray-400 flex items-center justify-center text-white text-xs text-center px-2">
           {card.name}
         </div>
       )}
