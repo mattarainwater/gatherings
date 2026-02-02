@@ -76,15 +76,15 @@ export const WordButton: React.FC<WordButtonProps> = ({
       className={`${baseClass} ${
         selected
           ? 'ring-4 ring-yellow-400 ring-offset-2 scale-95'
-          : 'ring-2 ring-gray-300 hover:ring-gray-400'
+          : 'ring-2 ring-gray-300 dark:ring-gray-600 hover:ring-gray-400 dark:hover:ring-gray-500'
       } flex items-center justify-center`}
     >
       {loading ? (
-        <div className="h-full bg-gray-300 animate-pulse" />
+        <div className="h-full bg-gray-300 dark:bg-gray-600 animate-pulse" />
       ) : imageUrl ? (
         <img src={imageUrl} alt={card.name} className="h-full w-full object-cover sm:object-contain object-center" />
       ) : (
-        <div className="h-full bg-gray-400 flex items-center justify-center text-white text-xs text-center px-2">
+        <div className="h-full bg-gray-400 dark:bg-gray-600 flex items-center justify-center text-white text-xs text-center px-2">
           {card.name}
         </div>
       )}

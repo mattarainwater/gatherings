@@ -87,12 +87,12 @@ ${guessesText}`
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4 text-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
           {gameState.won ? '🎉 You Won! 🎉' : '❌ Game Over ❌'}
         </h2>
 
-        <div className="mb-6 p-4 bg-gray-100 rounded text-center font-mono text-sm whitespace-pre-line break-words">
+        <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-700 rounded text-center font-mono text-sm whitespace-pre-line break-words text-gray-900 dark:text-gray-100">
           {resultsText}
         </div>
 
@@ -109,7 +109,7 @@ ${guessesText}`
           </button>
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-gray-400 text-white rounded font-semibold hover:bg-gray-500"
+            className="flex-1 px-4 py-2 bg-gray-400 dark:bg-gray-600 text-white rounded font-semibold hover:bg-gray-500 dark:hover:bg-gray-700"
           >
             Close
           </button>

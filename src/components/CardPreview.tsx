@@ -119,7 +119,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card, mouseX = 0, mous
       >
         <div className="shadow-2xl rounded-lg overflow-hidden">
           {loading ? (
-            <div className="w-64 h-96 bg-gray-200 animate-pulse rounded" />
+            <div className="w-64 h-96 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
           ) : (
             <img
               src={imageUrl}

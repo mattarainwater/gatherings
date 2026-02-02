@@ -54,7 +54,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     <div className="w-full h-screen sm:max-w-6xl sm:mx-auto mx-0 px-0 sm:px-4" onMouseMove={handleMouseMove}>
       <div className="flex flex-col lg:flex-row gap-6 items-start h-full sm:h-auto w-full">
         <div className="w-full lg:flex-1">
-          <div className="px-0 sm:px-4 py-3 sm:py-4 bg-white sm:rounded-lg sm:shadow-lg min-h-screen sm:min-h-[calc(100vh-4rem)] flex flex-col">
+          <div className="px-0 sm:px-4 py-3 sm:py-4 bg-white dark:bg-gray-900 sm:rounded-lg sm:shadow-lg min-h-screen sm:min-h-[calc(100vh-4rem)] flex flex-col transition-colors">
       {/* Title and Mistakes */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
@@ -63,8 +63,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             disabled={!canNavigatePrevious || isTransitioning}
             className={`p-1 ${
               canNavigatePrevious && !isTransitioning
-                ? 'text-blue-500 hover:text-blue-600 cursor-pointer'
-                : 'text-gray-300 cursor-not-allowed'
+                ? 'text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 cursor-pointer'
+                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
             }`}
             aria-label="Previous Day"
           >
@@ -73,8 +73,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             </svg>
           </button>
           <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-gray-800">Gatherings</h1>
-            <span className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Gatherings</h1>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
           </div>
@@ -83,8 +83,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             disabled={!canNavigateNext || isTransitioning}
             className={`p-1 ${
               canNavigateNext && !isTransitioning
-                ? 'text-blue-500 hover:text-blue-600 cursor-pointer'
-                : 'text-gray-300 cursor-not-allowed'
+                ? 'text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 cursor-pointer'
+                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
             }`}
             aria-label="Next Day"
           >
@@ -93,7 +93,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             </svg>
           </button>
         </div>
-        <div className="text-base font-semibold text-gray-600 text-center">
+        <div className="text-base font-semibold text-gray-600 dark:text-gray-300 text-center">
           Mistakes: {gameState.mistakes}/4
         </div>
         {gameState.message && (
@@ -111,10 +111,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           {solvedCategories.map(cat => (
             <div
               key={cat.name}
-              className={`${getColorClass(cat.color)} text-black p-3 rounded font-bold text-center`}
+              className={`${getColorClass(cat.color)} text-black p-3 rounded font-bold text-center uppercase text-lg`}
             >
               <div>{cat.name}</div>
-              <div className="text-xs opacity-75">{cat.cards.map(c => c.name).join(' | ')}</div>
+              <div className="text-sm opacity-75">{cat.cards.map(c => c.name).join(' | ')}</div>
             </div>
           ))}
         </div>
@@ -150,11 +150,11 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       {/* Game Over Message */}
       {gameState.gameOver && !gameState.won && (
         <div className="mb-6">
-          <div className="p-4 bg-red-100 text-red-800 rounded text-center font-semibold mb-4">
+          <div className="p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 rounded text-center font-semibold mb-4">
             Game Over! You made too many mistakes.
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-gray-800 mb-3 text-center">Solution:</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 text-center">Solution:</h2>
             {gameState.categories
               .filter(cat => !gameState.solved.includes(cat.name))
               .map(cat => (
@@ -171,13 +171,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       )}
 
       {gameState.won && (
-        <div className="mb-6 p-4 bg-green-100 text-green-800 rounded text-center font-semibold">
+        <div className="mb-6 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 rounded text-center font-semibold">
           You won! All categories found! 🎉
         </div>
       )}
 
       {/* Controls */}
-      <div className="mt-auto pt-4 flex gap-3 justify-center sticky bottom-0 bg-white pb-2">
+      <div className="mt-auto pt-4 flex gap-3 justify-center sticky bottom-0 bg-white dark:bg-gray-900 pb-2">
         {gameState.gameOver ? (
           <>
             <button

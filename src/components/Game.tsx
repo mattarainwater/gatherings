@@ -4,6 +4,7 @@ import { GameState, Category, Card } from '../types'
 import { shuffleArray } from '../utils/gameUtils'
 import { puzzleService } from '../services/puzzleService'
 import { ResultsPopup } from './ResultsPopup'
+import { Footer } from './Footer'
 
 export const Game: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -302,22 +303,22 @@ export const Game: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-lg text-gray-700">Loading puzzle...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="text-lg text-gray-700 dark:text-gray-300">Loading puzzle...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-lg text-red-600">Error: {error}</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="text-lg text-red-600 dark:text-red-400">Error: {error}</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white sm:bg-gray-100 py-0 sm:py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900 sm:bg-gray-100 sm:dark:bg-gray-800 py-0 sm:py-8 transition-colors">
       <div className="relative w-full sm:w-auto">
         <GameBoard
           gameState={gameState}
@@ -338,10 +339,10 @@ export const Game: React.FC = () => {
           onRestart={handleRestart}
         />
         {isTransitioning && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 rounded-lg flex items-center justify-center">
+          <div className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 rounded-lg flex items-center justify-center">
             <div className="flex flex-col items-center gap-3">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-              <span className="text-sm text-gray-600">Loading puzzle...</span>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Loading puzzle...</span>
             </div>
           </div>
         )}
@@ -353,6 +354,7 @@ export const Game: React.FC = () => {
           onClose={() => setShowResults(false)}
         />
       )}
+      <Footer />
     </div>
   )
 }
