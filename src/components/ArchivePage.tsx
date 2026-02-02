@@ -7,6 +7,8 @@ export const ArchivePage: React.FC = () => {
   const [dates, setDates] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [completedPuzzles, setCompletedPuzzles] = useState<Set<string>>(new Set())
+  const [failedPuzzles, setFailedPuzzles] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const fetchDates = async () => {
@@ -15,6 +17,27 @@ export const ArchivePage: React.FC = () => {
       try {
         const response = await puzzleService.getAllPuzzleDates()
         setDates(response.dates)
+        
+        // Check which puzzles have been completed or failed
+        const completed = new Set<string>()
+        const failed = new Set<string>()
+        response.dates.forEach(date => {
+          const savedState = localStorage.getItem(`gameState_${date}`)
+          if (savedState) {
+            try {
+              const state = JSON.parse(savedState)
+              if (state.won) {
+                completed.add(date)
+              } else if (state.gameOver) {
+                failed.add(date)
+              }
+            } catch {
+              // Ignore parsing errors
+            }
+          }
+        })
+        setCompletedPuzzles(completed)
+        setFailedPuzzles(failed)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load archive')
       } finally {
@@ -102,7 +125,17 @@ export const ArchivePage: React.FC = () => {
                       href={`/?date=${encodeURIComponent(date)}`}
                       className="block rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <div className="font-semibold">{formatDate(date)}</div>
+                      <div className="flex items-center justify-between">
+                        <div className="font-semibold">{formatDate(date)}</div>
+                        <div className="flex gap-2">
+                          {completedPuzzles.has(date) && (
+                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                          )}
+                          {failedPuzzles.has(date) && (
+                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                          )}
+                        </div>
+                      </div>
                     </a>
                   ))}
                 </div>
