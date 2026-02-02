@@ -44,14 +44,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     .filter((cat): cat is Category => cat !== undefined)
 
   const [hoveredCard, setHoveredCard] = useState<Card | undefined>(undefined)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY })
-  }
 
   return (
-    <div className="sm:max-w-6xl sm:mx-auto mx-0 px-0 sm:px-4" onMouseMove={handleMouseMove}>
+    <div className="sm:max-w-6xl sm:mx-auto mx-0 px-0 sm:px-4">
       <div className="flex flex-col lg:flex-row gap-6 items-start h-full w-full">
         <div className="w-full lg:flex-1">
           <div className="px-0 sm:px-4 py-3 sm:py-4 bg-white dark:bg-gray-900 sm:rounded-lg sm:shadow-lg h-full flex flex-col transition-colors">
@@ -230,7 +225,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       </div>
           </div>
         </div>
-        <CardPreview card={hoveredCard} mouseX={mousePos.x} mouseY={mousePos.y} />
+        <CardPreview card={hoveredCard} />
       </div>
     </div>
   )
