@@ -34,6 +34,16 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card }) => {
       setLoading(true)
 
       try {
+        // Use imageUrl from service call if available
+        if (card.imageUrl) {
+          if (isMounted) {
+            setImageUrl(card.imageUrl)
+            setLoading(false)
+          }
+          return
+        }
+
+        // Fall back to Scryfall API
         const response = await fetch(
           `https://api.scryfall.com/cards/${card.scryfall_id}`
         )

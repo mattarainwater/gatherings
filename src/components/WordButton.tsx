@@ -22,10 +22,17 @@ export const WordButton: React.FC<WordButtonProps> = ({
 }) => {
   const [imageUrl, setImageUrl] = useState<string>('')
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     const fetchCardImage = async () => {
       try {
+        // Use imageUrl from service call if available
+        if (card.imageUrl) {
+          setImageUrl(card.imageUrl)
+          setLoading(false)
+          return
+        }
+        console.log('fallback to scryfall for', card.name)
+        // Fall back to Scryfall API
         const response = await fetch(
           `https://api.scryfall.com/cards/${card.scryfall_id}`
         )
@@ -45,7 +52,7 @@ export const WordButton: React.FC<WordButtonProps> = ({
     }
 
     fetchCardImage()
-  }, [card.id])
+  }, [card.id, card.imageUrl])
 
   const baseClass = 'rounded transition-all cursor-pointer overflow-hidden aspect-[5/7]'
 
