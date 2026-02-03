@@ -192,7 +192,9 @@ export function PuzzleCreator() {
       const response = await puzzleService.getPuzzle(trimmedDate)
       
       // Map the response categories to match our form structure
-      const loadedCategories = response.categories.map((cat, index) => ({
+      const loadedCategories = [...response.categories]
+        .sort((a, b) => a.difficulty - b.difficulty)
+        .map((cat, index) => ({
         name: cat.name,
         cards: cat.cards.map(card => ({
           name: card.name,
