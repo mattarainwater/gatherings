@@ -65,12 +65,12 @@ export const puzzleService = {
     }
   },
 
-  createPuzzle: async (request: CreatePuzzleRequest): Promise<CreatePuzzleResponse> => {
+  createPuzzle: async (request: CreatePuzzleRequest, apiKey?: string): Promise<CreatePuzzleResponse> => {
     const response = await fetch(`${API_BASE_URL}/puzzles`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': import.meta.env.VITE_API_KEY || '',
+        'x-api-key': apiKey || import.meta.env.VITE_API_KEY || '',
       },
       body: JSON.stringify(request),
     })

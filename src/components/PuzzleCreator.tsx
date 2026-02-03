@@ -1,14 +1,16 @@
 import React, { useState } from 'react'
 import { Category } from '../types'
 import { puzzleService } from '../services/puzzleService'
+import { ApiKeyPopup } from './ApiKeyPopup'
 
 const COLORS: Array<'yellow' | 'green' | 'blue' | 'purple'> = ['yellow', 'green', 'blue', 'purple']
 
 export function PuzzleCreator() {
+  const [apiKey, setApiKey] = useState<string | null>(null)
   const [categories, setCategories] = useState<Category[]>(
     COLORS.map((color, index) => ({
       name: '',
-      cards: Array(4).fill(null).map(() => ({ name: '', id: '', imageUrl: '' })),
+      cards: Array(4).fill(null).map(() => ({ name: '', id: '', scryfall_id: '', imageUrl: '' })),
       color: color,
       difficulty: index + 1,
     }))
@@ -18,6 +20,7 @@ export function PuzzleCreator() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [lookupLoading, setLookupLoading] = useState<Record<string, boolean>>({})
   const [lookupErrors, setLookupErrors] = useState<Record<string, string>>({})
+  const [autocompleteText, setAutocompleteText] = useState('')
 
   const getLookupKey = (categoryIndex: number, cardIndex: number) => `${categoryIndex}-${cardIndex}`
 
@@ -86,6 +89,7 @@ export function PuzzleCreator() {
                     ? {
                         ...card,
                         id: data.id || card.id,
+                        scryfall_id: data.id || card.scryfall_id,
                         imageUrl,
                       }
                     : card
@@ -111,6 +115,118 @@ export function PuzzleCreator() {
       )
     } finally {
       setLookupLoading((prev) => ({ ...prev, [lookupKey]: false }))
+    }
+  }
+
+  const parseAutocompleteText = async (text: string) => {
+    const lines = text.trim().split('\n').filter(line => line.trim())
+    
+    if (lines.length !== 8) {
+      setMessage({ 
+        type: 'error', 
+        text: 'Invalid format. Expected 4 categories with name and cards (8 lines total)' 
+      })
+      return
+    }
+
+    const newCategories = COLORS.map((color, index) => {
+      const categoryName = lines[index * 2].trim()
+      const cardsLine = lines[index * 2 + 1].trim()
+      const cardNames = cardsLine.split('|').map(name => name.trim())
+
+      if (cardNames.length !== 4) {
+        return null
+      }
+
+      return {
+        name: categoryName,
+        cards: cardNames.map(name => ({
+          name,
+          id: '',
+          scryfall_id: '',
+          imageUrl: ''
+        })),
+        color,
+        difficulty: index + 1
+      }
+    })
+
+    if (newCategories.some(cat => cat === null)) {
+      setMessage({ 
+        type: 'error', 
+        text: 'Each category must have exactly 4 cards separated by |' 
+      })
+      return
+    }
+
+    setCategories(newCategories as Category[])
+    setMessage({ type: 'success', text: 'Form populated! Card lookups will begin automatically.' })
+    setAutocompleteText('')
+
+    // Trigger lookups for all cards
+    for (let catIndex = 0; catIndex < 4; catIndex++) {
+      for (let cardIndex = 0; cardIndex < 4; cardIndex++) {
+        const cardName = newCategories[catIndex]!.cards[cardIndex].name
+        if (cardName) {
+          // Add small delay to avoid rate limiting
+          setTimeout(() => {
+            handleCardNameLookup(catIndex, cardIndex, cardName)
+          }, (catIndex * 4 + cardIndex) * 200)
+        }
+      }
+    }
+  }
+
+  const handleDateLookup = async (date: string) => {
+    const trimmedDate = date.trim()
+    const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/
+    
+    if (!trimmedDate || !dateRegex.test(trimmedDate)) {
+      return
+    }
+
+    setIsLoading(true)
+    setMessage(null)
+
+    try {
+      const response = await puzzleService.getPuzzle(trimmedDate)
+      
+      // Map the response categories to match our form structure
+      const loadedCategories = response.categories.map((cat, index) => ({
+        name: cat.name,
+        cards: cat.cards.map(card => ({
+          name: card.name,
+          id: card.id,
+          scryfall_id: card.scryfall_id,
+          imageUrl: card.imageUrl || ''
+        })),
+        color: COLORS[index],
+        difficulty: cat.difficulty
+      }))
+
+      setCategories(loadedCategories)
+      setMessage({ 
+        type: 'success', 
+        text: `Loaded existing puzzle for ${trimmedDate}. You can now edit and update it.` 
+      })
+
+      // Trigger lookups for all cards to load images
+      for (let catIndex = 0; catIndex < loadedCategories.length; catIndex++) {
+        for (let cardIndex = 0; cardIndex < loadedCategories[catIndex].cards.length; cardIndex++) {
+          const cardName = loadedCategories[catIndex].cards[cardIndex].name
+          if (cardName) {
+            // Add small delay to avoid rate limiting
+            setTimeout(() => {
+              handleCardNameLookup(catIndex, cardIndex, cardName)
+            }, (catIndex * 4 + cardIndex) * 200)
+          }
+        }
+      }
+    } catch (error) {
+      // If puzzle doesn't exist for this date, that's okay - just clear the message
+      console.log('No puzzle found for date:', trimmedDate)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -163,7 +279,7 @@ export function PuzzleCreator() {
             id: card.id || `card-${Math.random()}`,
           })),
         })),
-      })
+      }, apiKey || undefined)
 
       if (response.success) {
         setMessage({
@@ -175,7 +291,7 @@ export function PuzzleCreator() {
         setCategories(
           COLORS.map((color, index) => ({
             name: '',
-            cards: Array(4).fill(null).map(() => ({ name: '', id: '', imageUrl: '' })),
+            cards: Array(4).fill(null).map(() => ({ name: '', id: '', scryfall_id: '', imageUrl: '' })),
             color: color,
             difficulty: index + 1,
           }))
@@ -199,9 +315,12 @@ export function PuzzleCreator() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white shadow rounded-lg p-6">
+    <>
+      {!apiKey && <ApiKeyPopup onSubmit={setApiKey} />}
+      
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white shadow rounded-lg p-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Puzzle</h1>
           <p className="text-gray-600 mb-6">
             Create a puzzle by defining 4 categories with 4 cards each
@@ -220,6 +339,28 @@ export function PuzzleCreator() {
           )}
 
           <form onSubmit={handleSubmit}>
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Quick Import (Optional)
+              </label>
+              <textarea
+                value={autocompleteText}
+                onChange={(e) => setAutocompleteText(e.target.value)}
+                placeholder={`Paste puzzle data here (format: category name, then cards separated by |)\n\nExample:\nHas 10+ Standard Reprints\nCancel | Giant Spider | Lava Axe | Mind Rot`}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                rows={6}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => parseAutocompleteText(autocompleteText)}
+                disabled={isLoading || !autocompleteText.trim()}
+                className="mt-2 bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+              >
+                Parse and Fill Form
+              </button>
+            </div>
+
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Publish Date
@@ -228,6 +369,7 @@ export function PuzzleCreator() {
                 type="text"
                 value={publishDate}
                 onChange={(e) => setPublishDate(e.target.value)}
+                onBlur={(e) => handleDateLookup(e.target.value)}
                 placeholder="e.g., 1/30/2026"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 disabled={isLoading}
@@ -336,6 +478,7 @@ export function PuzzleCreator() {
           </form>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
