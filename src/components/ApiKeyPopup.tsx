@@ -4,6 +4,8 @@ interface ApiKeyPopupProps {
   onSubmit: (apiKey: string) => void
 }
 
+const API_KEY_STORAGE_KEY = 'magic-connections-api-key'
+
 export function ApiKeyPopup({ onSubmit }: ApiKeyPopupProps) {
   const [apiKey, setApiKey] = useState('')
   const [error, setError] = useState('')
@@ -17,6 +19,8 @@ export function ApiKeyPopup({ onSubmit }: ApiKeyPopupProps) {
       return
     }
     
+    // Save to local storage
+    localStorage.setItem(API_KEY_STORAGE_KEY, trimmedKey)
     onSubmit(trimmedKey)
   }
 

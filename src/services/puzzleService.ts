@@ -23,9 +23,17 @@ export interface PuzzleDateListResponse {
 }
 
 const API_BASE_URL = 'https://9sengzv8jb.execute-api.us-east-2.amazonaws.com/prod'
+const API_KEY_STORAGE_KEY = 'magic-connections-api-key'
 
 export const puzzleService = {
   getPuzzle: async (puzzleDate?: string): Promise<PuzzleResponse> => {
+    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY)
+    
+    // Use admin endpoint if API key is available
+    if (apiKey) {
+      return puzzleService.getPuzzleAdmin(puzzleDate)
+    }
+    
     const url = new URL(`${API_BASE_URL}/puzzles`)
     if (puzzleDate) {
       url.searchParams.append('puzzledate', puzzleDate)
@@ -48,6 +56,13 @@ export const puzzleService = {
   },
 
   getAllPuzzleDates: async (): Promise<PuzzleDateListResponse> => {
+    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY)
+    
+    // Use admin endpoint if API key is available
+    if (apiKey) {
+      return puzzleService.getAllPuzzleDatesAdmin()
+    }
+    
     const url = new URL(`${API_BASE_URL}/puzzles`)
     url.searchParams.append('all', 'all')
 
@@ -55,6 +70,51 @@ export const puzzleService = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+      },
+    })
+
+    const data = await response.json()
+
+    return {
+      dates: (data.result || []).map((item: { publish_date: string }) => item.publish_date),
+    }
+  },
+
+  getPuzzleAdmin: async (puzzleDate?: string): Promise<PuzzleResponse> => {
+    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || ''
+    const url = new URL(`${API_BASE_URL}/puzzleadmin`)
+    if (puzzleDate) {
+      url.searchParams.append('puzzledate', puzzleDate)
+    }
+    
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+      },
+    })
+
+    const data = await response.json()
+    console.log(data)
+    return {
+      categories: data.result.puzzle.categories as Category[],
+      puzzleDate: data.result.puzzle.publish_date,
+      nextPuzzleDate: data.result.nextPuzzleDate || null,
+      prevPuzzleDate: data.result.prevPuzzleDate || null,
+    }
+  },
+
+  getAllPuzzleDatesAdmin: async (): Promise<PuzzleDateListResponse> => {
+    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || ''
+    const url = new URL(`${API_BASE_URL}/puzzleadmin`)
+    url.searchParams.append('all', 'all')
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
       },
     })
 

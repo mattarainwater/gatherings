@@ -1,12 +1,15 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDarkMode } from '../contexts/DarkModeContext'
 import { HowToPlayPopup } from './HowToPlayPopup'
+
+const API_KEY_STORAGE_KEY = 'magic-connections-api-key'
 
 export const Header: React.FC = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode()
   const [showHowToPlay, setShowHowToPlay] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [hasApiKey, setHasApiKey] = useState(false)
   const navigate = useNavigate()
 
   // Get today's date in Central Time
@@ -23,6 +26,15 @@ export const Header: React.FC = () => {
     e.preventDefault()
     const todayUrl = `/?date=${getTodayInCentralTime()}&t=${Date.now()}`
     navigate(todayUrl, { replace: false })
+  }
+
+  useEffect(() => {
+    setHasApiKey(Boolean(localStorage.getItem(API_KEY_STORAGE_KEY)))
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem(API_KEY_STORAGE_KEY)
+    setHasApiKey(false)
   }
 
   return (
@@ -94,6 +106,14 @@ export const Header: React.FC = () => {
             >
               Buy me a Booster! ☕
             </a>
+            {hasApiKey && (
+              <button
+                onClick={handleLogout}
+                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 underline"
+              >
+                Logout
+              </button>
+            )}
           </div>
           {showMobileMenu && (
             <div className="sm:hidden mt-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 p-3">
@@ -128,6 +148,19 @@ export const Header: React.FC = () => {
                     Buy me a Booster! ☕
                   </a>
                 </li>
+                {hasApiKey && (
+                  <li>
+                    <button
+                      onClick={() => {
+                        handleLogout()
+                        setShowMobileMenu(false)
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-white dark:hover:bg-gray-700"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
           )}

@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Category } from '../types'
 import { puzzleService } from '../services/puzzleService'
 import { ApiKeyPopup } from './ApiKeyPopup'
 
 const COLORS: Array<'yellow' | 'green' | 'blue' | 'purple'> = ['yellow', 'green', 'blue', 'purple']
+const API_KEY_STORAGE_KEY = 'magic-connections-api-key'
 
 export function PuzzleCreator() {
   const [apiKey, setApiKey] = useState<string | null>(null)
@@ -21,6 +22,14 @@ export function PuzzleCreator() {
   const [lookupLoading, setLookupLoading] = useState<Record<string, boolean>>({})
   const [lookupErrors, setLookupErrors] = useState<Record<string, string>>({})
   const [autocompleteText, setAutocompleteText] = useState('')
+
+  // Load API key from local storage on mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY)
+    if (savedApiKey) {
+      setApiKey(savedApiKey)
+    }
+  }, [])
 
   const getLookupKey = (categoryIndex: number, cardIndex: number) => `${categoryIndex}-${cardIndex}`
 
@@ -310,21 +319,29 @@ export function PuzzleCreator() {
   }
 
   const colorClasses: Record<string, string> = {
-    yellow: 'bg-yellow-100 border-yellow-300',
-    green: 'bg-green-100 border-green-300',
-    blue: 'bg-blue-100 border-blue-300',
-    purple: 'bg-purple-100 border-purple-300',
+    yellow: 'bg-yellow-100 border-yellow-300 dark:bg-yellow-900/30 dark:border-yellow-700',
+    green: 'bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700',
+    blue: 'bg-blue-100 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700',
+    purple: 'bg-purple-100 border-purple-300 dark:bg-purple-900/30 dark:border-purple-700',
   }
 
   return (
     <>
       {!apiKey && <ApiKeyPopup onSubmit={setApiKey} />}
       
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white shadow rounded-lg p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Puzzle</h1>
-          <p className="text-gray-600 mb-6">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Create New Puzzle</h1>
+            <a
+              href="/"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
+            >
+              Back to Home
+            </a>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             Create a puzzle by defining 4 categories with 4 cards each
           </p>
 
@@ -332,8 +349,8 @@ export function PuzzleCreator() {
             <div
               className={`mb-4 p-4 rounded ${
                 message.type === 'success'
-                  ? 'bg-green-50 border border-green-200 text-green-800'
-                  : 'bg-red-50 border border-red-200 text-red-800'
+                  ? 'bg-green-50 border border-green-200 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-200'
+                  : 'bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-700 dark:text-red-200'
               }`}
             >
               {message.text}
@@ -341,15 +358,15 @@ export function PuzzleCreator() {
           )}
 
           <form onSubmit={handleSubmit}>
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-700 rounded-lg">
+              <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                 Quick Import (Optional)
               </label>
               <textarea
                 value={autocompleteText}
                 onChange={(e) => setAutocompleteText(e.target.value)}
                 placeholder={`Paste puzzle data here (format: category name, then cards separated by |)\n\nExample:\nHas 10+ Standard Reprints\nCancel | Giant Spider | Lava Axe | Mind Rot`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                 rows={6}
                 disabled={isLoading}
               />
@@ -364,7 +381,7 @@ export function PuzzleCreator() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                 Publish Date
               </label>
               <input
@@ -373,10 +390,10 @@ export function PuzzleCreator() {
                 onChange={(e) => setPublishDate(e.target.value)}
                 onBlur={(e) => handleDateLookup(e.target.value)}
                 placeholder="e.g., 1/30/2026"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 disabled={isLoading}
               />
-              <p className="mt-1 text-sm text-gray-500">Format: m/d/yyyy</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Format: m/d/yyyy</p>
             </div>
 
             <div className="space-y-8">
@@ -386,7 +403,7 @@ export function PuzzleCreator() {
                   className={`border-2 rounded-lg p-6 ${colorClasses[category.color]}`}
                 >
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                       Category {categoryIndex + 1} Name
                     </label>
                     <input
@@ -394,17 +411,17 @@ export function PuzzleCreator() {
                       value={category.name}
                       onChange={(e) => handleCategoryNameChange(categoryIndex, e.target.value)}
                       placeholder={`e.g., Green Creature Cards`}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       disabled={isLoading}
                     />
                   </div>
 
                   <div className="space-y-4">
                     {category.cards.map((card, cardIndex) => (
-                      <div key={cardIndex} className="border-t pt-4 first:border-t-0 first:pt-0">
+                      <div key={cardIndex} className="border-t dark:border-gray-700 pt-4 first:border-t-0 first:pt-0">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-medium text-gray-900 mb-2">
+                            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                               Card {cardIndex + 1} Name
                             </label>
                             <input
@@ -417,20 +434,20 @@ export function PuzzleCreator() {
                                 handleCardNameLookup(categoryIndex, cardIndex, e.target.value)
                               }
                               placeholder="e.g., Lightning Bolt"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                               disabled={isLoading}
                             />
                             {lookupLoading[getLookupKey(categoryIndex, cardIndex)] && (
-                              <div className="mt-2 text-xs text-gray-600">Looking up card…</div>
+                              <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">Looking up card…</div>
                             )}
                             {lookupErrors[getLookupKey(categoryIndex, cardIndex)] && (
-                              <div className="mt-2 text-xs text-red-600">
+                              <div className="mt-2 text-xs text-red-600 dark:text-red-400">
                                 {lookupErrors[getLookupKey(categoryIndex, cardIndex)]}
                               </div>
                             )}
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-900 mb-2">
+                            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                               Card {cardIndex + 1} ID
                             </label>
                             <input
@@ -440,7 +457,7 @@ export function PuzzleCreator() {
                                 handleCardChange(categoryIndex, cardIndex, 'id', e.target.value)
                               }
                               placeholder="Scryfall ID or UUID"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                               disabled={isLoading}
                             />
                           </div>
@@ -450,7 +467,7 @@ export function PuzzleCreator() {
                             <img
                               src={card.imageUrl}
                               alt={card.name}
-                              className="w-40 rounded-md border border-gray-200 shadow-sm"
+                              className="w-40 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm"
                             />
                           </div>
                         )}
@@ -472,7 +489,7 @@ export function PuzzleCreator() {
               <button
                 type="reset"
                 disabled={isLoading}
-                className="px-6 bg-gray-200 text-gray-800 py-2 rounded-md font-medium hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 transition"
+                className="px-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100 py-2 rounded-md font-medium hover:bg-gray-300 dark:hover:bg-gray-600 disabled:bg-gray-100 disabled:text-gray-400 transition"
               >
                 Reset
               </button>
