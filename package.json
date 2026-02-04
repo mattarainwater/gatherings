@@ -4,10 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "dev:creator": "vite --open /creator.html",
     "build": "vite build",
-    "preview": "vite preview",
-    "preview:creator": "vite preview --open /creator.html"
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
