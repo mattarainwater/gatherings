@@ -84,7 +84,7 @@ export const ResultsPopup: React.FC<ResultsPopupProps> = ({
       .join('\n')
 
     let text = `Gatherings
-    ${parseAPIDate(puzzleDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+${parseAPIDate(puzzleDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
 ${status}
 ${guessesText}`
     return text
