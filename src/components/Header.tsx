@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDarkMode } from '../contexts/DarkModeContext'
 import { HowToPlayPopup } from './HowToPlayPopup'
+import { TipsPopup } from './TipsPopup'
 
 const API_KEY_STORAGE_KEY = 'magic-connections-api-key'
 
 export const Header: React.FC = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode()
   const [showHowToPlay, setShowHowToPlay] = useState(false)
+  const [showTips, setShowTips] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [hasApiKey, setHasApiKey] = useState(false)
   const navigate = useNavigate()
@@ -92,6 +94,12 @@ export const Header: React.FC = () => {
             >
               How to Play
             </button>
+            <button
+              onClick={() => setShowTips(true)}
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
+            >
+              Hints
+            </button>
             <Link
               to="/archive"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
@@ -127,6 +135,17 @@ export const Header: React.FC = () => {
                     className="w-full text-left px-3 py-2 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-white dark:hover:bg-gray-700"
                   >
                     How to Play
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setShowTips(true)
+                      setShowMobileMenu(false)
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-white dark:hover:bg-gray-700"
+                  >
+                    Hints
                   </button>
                 </li>
                 <li>
@@ -168,6 +187,9 @@ export const Header: React.FC = () => {
       </header>
       {showHowToPlay && (
         <HowToPlayPopup onClose={() => setShowHowToPlay(false)} />
+      )}
+      {showTips && (
+        <TipsPopup onClose={() => setShowTips(false)} />
       )}
     </>
   )

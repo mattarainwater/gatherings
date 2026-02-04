@@ -1,13 +1,20 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { TipsPopup } from './TipsPopup'
 
 interface HowToPlayPopupProps {
   onClose: () => void
 }
 
 export const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
+  const [showTips, setShowTips] = useState(false)
+
+  if (showTips) {
+    return <TipsPopup onClose={() => setShowTips(false)} />
+  }
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
           How to Play Gatherings
         </h2>
@@ -55,16 +62,8 @@ export const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
             </div>
           </section>
 
-          <section>
-            <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">Tips</h3>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>Start with the easiest connections you can spot</li>
-              <li>Look at card names, types, abilities or lore connections</li>
-              <li>Some categories might involve more obscure facts about the cards</li>
-              <li>Be careful of red herrings - cards that seem related but aren't in the same group</li>
-              <li>Use the "Shuffle" button to rearrange cards for a fresh perspective</li>
-              <li>Click "Deselect All" to clear your current selection</li>
-            </ul>
+          <section className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <p>Need some help? Check out our <button onClick={() => setShowTips(true)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline font-semibold">Tips & Tricks</button>!</p>
           </section>
         </div>
 
