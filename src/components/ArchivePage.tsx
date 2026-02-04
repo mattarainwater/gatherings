@@ -108,7 +108,9 @@ export const ArchivePage: React.FC = () => {
         )}
 
         {error && (
-          <div className="text-center text-red-600 dark:text-red-400">Error: {error}</div>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Gatherings Coming Soon!</h2>
+          </div>
         )}
 
         {!loading && !error && (

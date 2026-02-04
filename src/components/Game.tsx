@@ -412,8 +412,14 @@ export const Game: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <div className="text-lg text-red-600 dark:text-red-400">Error: {error}</div>
+      <div className="flex flex-col bg-white dark:bg-gray-900 sm:bg-gray-100 sm:dark:bg-gray-800 transition-colors min-h-screen">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Gatherings Coming Soon!</h1>
+          </div>
+        </div>
+        <Footer />
       </div>
     )
   }
