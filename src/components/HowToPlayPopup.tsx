@@ -63,7 +63,7 @@ export const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
           </section>
 
           <section className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <p>Need some help? Check out our <button onClick={() => setShowTips(true)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline font-semibold">Tips & Tricks</button>!</p>
+            <p>Need some help? Check out the <button onClick={() => setShowTips(true)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline font-semibold">Hints</button>!</p>
           </section>
         </div>
 
