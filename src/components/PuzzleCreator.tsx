@@ -199,7 +199,7 @@ export function PuzzleCreator() {
 
     try {
       const response = await puzzleService.getPuzzle(trimmedDate)
-      
+      setPublishDate(response.puzzleDate)
       // Map the response categories to match our form structure
       const loadedCategories = [...response.categories]
         .sort((a, b) => a.difficulty - b.difficulty)
@@ -218,7 +218,7 @@ export function PuzzleCreator() {
       setCategories(loadedCategories)
       setMessage({ 
         type: 'success', 
-        text: `Loaded existing puzzle for ${trimmedDate}. You can now edit and update it.` 
+        text: `Loaded existing puzzle for ${response.puzzleDate}. You can now edit and update it.` 
       })
 
       // Trigger lookups for all cards to load images

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import moment from 'moment'
 import { WordButton } from './WordButton'
 import { CardPreview } from './CardPreview'
 import { ResultsPopup } from './ResultsPopup'
@@ -69,7 +70,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           </button>
           <div className="flex flex-col items-center">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-              {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h1>
+              {moment.utc(selectedDate).format('MMM D, YYYY')}</h1>
           </div>
           <button
             onClick={onNextDay}

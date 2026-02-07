@@ -437,7 +437,7 @@ export const Game: React.FC = () => {
           onSolve={handleSolve}
           onShuffle={handleShuffle}
           onDeselect={handleDeselect}
-          selectedDate={selectedDate}
+          selectedDate={puzzleId ? new Date(puzzleId) : new Date()}
           canNavigatePrevious={canNavigatePrevious}
           canNavigateNext={canNavigateNext}
           onPreviousDay={handlePreviousDay}
